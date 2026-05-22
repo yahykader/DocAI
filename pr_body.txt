@@ -1,0 +1,23 @@
+## Summary
+Added bash.exe.stackdump to .gitignore in the OS section to prevent accidental commits of Windows Git Bash crash dump files. This ensures a cleaner repository history and avoids noise from development environment crashes.
+
+## Changes
+- Added bash.exe.stackdump entry to .gitignore OS section
+- Prevents Windows Git Bash crash dumps from being tracked in version control
+- Single-line configuration update, no code changes
+
+## Test Plan
+1. Verify the .gitignore entry: `git show HEAD:.gitignore | grep bash.exe.stackdump`
+   - Confirm bash.exe.stackdump appears in the OS section
+2. Generate a test stack dump file: `touch bash.exe.stackdump`
+3. Run `git status` and verify the file is not listed as untracked
+   - File should be ignored by Git
+4. Clean up: `rm bash.exe.stackdump`
+
+## Dependencies / Related
+- **No new dependencies** — pure configuration change
+- **No breaking changes** — additive-only update to .gitignore
+- **Backward compatible** — existing tracked files unaffected
+- **Related**: Development environment setup, .gitignore maintenance
+
+🤖 Generated with Claude Code
