@@ -1,0 +1,162 @@
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+*.jar
+!/.mvn/wrapper/maven-wrapper.jar
+
+# Node.js / npm (Angular frontend)
+node_modules/
+dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.pnp
+.pnp.js
+
+# IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+.DS_Store
+*.swp
+*.swo
+*~
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+*.sublime-project
+
+# OS
+.DS_Store
+Thumbs.db
+*.log
+.env
+.env.local
+.env.*.local
+
+# Build / dist
+build/
+dist/
+out/
+*.o
+*.so
+*.dylib
+
+# Angular specific
+.angular/
+.ng-build
+.storybook-build
+
+# Testing
+coverage/
+.nyc_output/
+.karma-result.json
+junit.xml
+
+# Docker
+.docker/
+docker-compose.override.yml
+
+# Gradle (if used)
+.gradle/
+build/
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+.temp/
+
+# Git
+.git/
+
+# IntelliJ
+*.hprof
+*.iml
+.idea_modules/
+out/
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# WebStorm
+.idea/watcherTasks.xml
+
+# Mac
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+.directory
+
+# Sensitive/Local
+*.key
+*.pem
+*.p8
+*.p12
+*.pfx
+*.jks
+!sample.env
+!.env.example
+
+# Application specific
+logs/
+*.log
+.cache/
+temp/
+
+# Maven wrapper
+.mvn/wrapper/maven-wrapper.properties
+
+# JVM crash logs
+hs_err_pid*.log
+
+# Playwright
+test-results/
+playwright-report/
+
+# Generated files
+.generate_gradle/
+
+# Lock files (optional - comment out if you want to track)
+# package-lock.json
+# yarn.lock
+
+# Storybook
+storybook-static/
+
+# OpenTelemetry
+.otel/
+
+# SonarCloud
+.scannerwork/
+.sonar/
+
+# Gradle
+gradle/
+gradlew
+gradlew.bat
+
+# Custom
+.specify/outputs/
+.specify/logs/

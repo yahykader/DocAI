@@ -10,35 +10,20 @@
 
 ## Sommaire
 
-- [PARTIE 0 — Vision & Description](#partie-0--vision--description)
-  - [Module 0.A — Présentation du Projet](#module-0a--présentation-du-projet)
-- [PARTIE 1 — Architecture & Choix Techniques](#partie-1--architecture--choix-techniques)
-  - [Module 1.A — Architecture & Principes](#module-1a--architecture--principes)
-  - [Module 1.B — Stack & Intégrations](#module-1b--stack--intégrations)
-  - [Module 1.C — Persistance & Standards](#module-1c--persistance--standards)
-- [PARTIE 2 — Mise en place & CI/CD](#partie-2--mise-en-place--cicd)
-  - [Module 2.A — Setup Projet](#module-2a--setup-projet)
-  - [Module 2.B — Standards & Qualité](#module-2b--standards--qualité)
-  - [Module 2.C — CI/CD Pipeline](#module-2c--cicd-pipeline)
-- [PARTIE 3 — Commons](#partie-3--commons)
-  - [Module 3.A — Composants Réutilisables](#module-3a--composants-réutilisables)
-- [PARTIE 4 — Fondations Métier](#partie-4--fondations-métier)
-  - [Module 0 — Sécurité & Multi-Tenancy](#module-0--sécurité--multi-tenancy)
-  - [Module 0.5 — RGPD & Privacy](#module-05--rgpd--privacy)
-- [PARTIE 5 — Pipeline de Traitement](#partie-5--pipeline-de-traitement)
+- [Description du Projet](#description-du-projet)
+- [I — Architecture & Choix Techniques](#i--architecture--choix-techniques)
+- [II — Fondations du Projet](#ii--fondations-du-projet)
+  - [II.1 — Création du Projet (Setup)](#ii1--création-du-projet-setup)
+  - [II.2 — CI/CD Pipeline](#ii2--cicd-pipeline)
+- [III — Modules par Ordre de Création](#iii--modules-par-ordre-de-création)
+  - [Module 0 — Sécurité & Multi-Tenancy (Fondation transversale)](#module-0--sécurité--multi-tenancy-fondation-transversale)
   - [Module 1 — Reconnaissance de Documents](#module-1--reconnaissance-de-documents)
   - [Module 2 — Extraction d'Informations](#module-2--extraction-dinformations)
   - [Module 3 — Détection de Fraude](#module-3--détection-de-fraude)
   - [Module 4 — Orchestration & Pipeline](#module-4--orchestration--pipeline)
-- [PARTIE 6 — Produit & Monétisation](#partie-6--produit--monétisation)
   - [Module 5 — Dashboard & Reporting](#module-5--dashboard--reporting)
   - [Module 6 — Intégrations & API Publique](#module-6--intégrations--api-publique)
-  - [Module 7 — Billing & Abonnements](#module-7--billing--abonnements)
-- [PARTIE 7 — Annexes](#partie-7--annexes)
-  - [Module 7.A — Roadmap & Checklists](#module-7a--roadmap--checklists)
-  - [Module 7.B — ADR — Décisions Architecturales](#module-7b--adr--décisions-architecturales-annexe-e)
-  - [Module 7.C — Standards Opérationnels](#module-7c--standards-opérationnels-annexe-f)
-  - [Module 7.D — Tests & i18n](#module-7d--tests--i18n-annexe-g)
+- [Annexes](#annexes)
 
 ---
 
@@ -46,36 +31,36 @@
 
 ## Ordre de Développement
 
+
 > **Ce document est organisé dans l'ordre exact de développement.**
 > Lire et implémenter dans l'ordre de haut en bas.
 
 | Partie | Contenu | Durée | Prérequis |
 |--------|---------|-------|-----------|
-| **0 — Vision & Description** | Comprendre le projet et les choix techniques | Lecture 2h | Aucun |
-| **1 — Architecture & Choix Techniques** | Architecture hexagonale, stack, patterns | Lecture 3h | Partie 0 lue |
-| **2 — Mise en place & CI/CD** | Créer le projet, CI/CD, standards | 1 semaine | Partie 1 lue |
-| **3 — Commons** | 7 composants réutilisables | 2 semaines | Partie 2 validée |
-| **4 — Fondations Métier** | Sécurité, Login, RGPD | 4 semaines | Partie 3 terminée |
-| **5 — Pipeline de Traitement** | Modules 1 à 4 (traitement documentaire) | 14 semaines | Partie 4 validée |
-| **6 — Produit & Monétisation** | Dashboard, API, Billing | 7 semaines | Partie 5 fonctionnelle |
-| **7 — Annexes** | ADR, Standards, Production Readiness | Référence permanente | — |
+| **0 — Description & Architecture** | Comprendre le projet et les choix techniques | Lecture 2h | Aucun |
+| **1 — Mise en place** | Créer le projet, CI/CD, standards | 1 semaine | Partie 0 lue |
+| **2 — Commons** | 7 composants réutilisables | 2 semaines | Partie 1 validée |
+| **3 — Fondations métier** | Sécurité, Login, RGPD | 4 semaines | Partie 2 terminée |
+| **4 — Pipeline** | Modules 1 à 4 (traitement documentaire) | 14 semaines | Partie 3 validée |
+| **5 — Produit** | Dashboard, API, Billing | 7 semaines | Partie 4 fonctionnelle |
+| **Annexes** | ADR, Standards, Production Readiness | Référence permanente | — |
 
 
 ---
 
-# PARTIE 0 — Vision & Description
+# PARTIE 0 — DESCRIPTION & VISION DU PROJET
 
 > **Lire en premier.** Comprendre le problème résolu, les marchés cibles et les business values avant de toucher au code. Cette partie définit le POURQUOI du projet.
 
 ---
 
-## Module 0.A — Présentation du Projet
+# Description du Projet
 
-### Phase 1 — Le problème résolu
+## Le problème résolu
 
 Dans les entreprises, les documents (factures, contrats, CNI, ordonnances, bulletins de salaire) sont encore traités massivement à la main. Un comptable saisit manuellement les données d'une facture dans un ERP. Un gestionnaire vérifie visuellement si un RIB est cohérent. Un service fraude consulte chaque document suspect un par un. Ce traitement crée trois problèmes coûteux : erreurs humaines, délais de traitement et fraudes non détectées.
 
-### Phase 2 — La solution DocAI (pipeline 5 étapes)
+## La solution DocAI
 
 DocAI est un **SaaS B2B** qui automatise la chaîne complète de traitement documentaire :
 
@@ -98,7 +83,7 @@ Document entrant (PDF, image)
   [Livraison]      → JSON structuré → webhook / API / dashboard
 ```
 
-### Phase 3 — Marchés cibles (6 secteurs)
+## Marchés cibles
 
 | Secteur | Cas d'usage principal |
 |---------|----------------------|
@@ -109,7 +94,7 @@ Document entrant (PDF, image)
 | Santé | Validation des ordonnances et comptes rendus médicaux |
 | Immobilier | Dossiers locataires (justificatifs domicile, revenus) |
 
-### Phase 4 — Business Values en chiffres (6 KPIs)
+## Business Values — en chiffres
 
 | KPI | Sans DocAI | Avec DocAI | Gain |
 |-----|-----------|-----------|------|
@@ -124,13 +109,12 @@ Document entrant (PDF, image)
 
 ---
 
-# PARTIE 1 — Architecture & Choix Techniques
+# I — Architecture & Choix Techniques
 
 > **Lire cette section en entier avant d'écrire la première ligne de code.** Elle définit toutes les décisions techniques structurantes du projet.
 
-## Module 1.A — Architecture & Principes
 
-### Phase 1 — Architecture Hexagonale (Ports & Adapters)
+## I.1 Architecture Hexagonale (Ports & Adapters)
 
 ### Pourquoi cette architecture ?
 
@@ -375,7 +359,7 @@ fr.docai/
 | BR-ARCH-005 | Toute nouvelle règle ArchUnit est discutée en équipe avant ajout | SHOULD |
 
 
-### Phase 2 — Principes SOLID appliqués
+## I.2 Principes SOLID appliqués
 
 | Principe | Application concrète dans DocAI |
 |----------|----------------------------------|
@@ -385,7 +369,7 @@ fr.docai/
 | **I** — Interface Segregation | `OcrPort` ≠ `LlmPort` ≠ `StoragePort` — ports fins et ciblés. |
 | **D** — Dependency Inversion | Les Use Cases dépendent des interfaces Ports, jamais des implémentations Adapters. |
 
-### Phase 3 — Catalogue des Design Patterns
+## I.3 Catalogue des Design Patterns
 
 | Pattern | Modules concernés | Rôle |
 |---------|-------------------|------|
@@ -408,9 +392,7 @@ fr.docai/
 | **Null Object / Fail-Safe** | Fraude | Analyse partielle si un analyseur est indisponible |
 | **Test Data Builder** | Tests | Builders réutilisables pour les données de test |
 
-## Module 1.B — Stack & Intégrations
-
-### Phase 1 — Stack Technique (décisions détaillées + pourquoi S3)
+## I.4 Stack Technique — Décisions détaillées
 
 | Composant | Technologie | Version | Décision & Justification |
 |-----------|-------------|---------|--------------------------|
@@ -438,7 +420,7 @@ fr.docai/
 
 MinIO est excellent pour le développement local mais son modèle de licence AGPL 3.0 crée des obligations contraignantes en production SaaS. Amazon S3 offre une API compatible (les adapters Spring ne changent pas), un SLA 99.999999999%, une durabilité native multi-AZ, et un coût à l'usage sans infrastructure à maintenir. En développement local, le SDK AWS S3 peut pointer vers un bucket de dev ou être mocké via WireMock/LocalStack dans les tests d'intégration.
 
-### Phase 2 — Topologie Kafka
+## I.5 Topologie Kafka — Vue globale
 
 | Topic | Producteur | Consommateur(s) | Rétention | Partitions |
 |-------|-----------|-----------------|-----------|-----------|
@@ -683,7 +665,7 @@ Dans Grafana, les alertes de lag utilisent ces group IDs :
 - Idempotence producer activée (`enable.idempotence=true`)
 - Headers propagés : `tenant-id`, `correlation-id`, `event-type`, `traceId`
 
-### Phase 3 — Stratégies de Cache Valkey
+## I.6 Stratégies de Cache Valkey
 
 | Données | Stratégie | TTL | Invalidation |
 |---------|-----------|-----|-------------|
@@ -694,7 +676,7 @@ Dans Grafana, les alertes de lag utilisent ces group IDs :
 | Clés d'idempotence | Write-Once | 24h (pas de jitter — précision requise) | Aucune (immutable) |
 | Compteurs rate limiting | Write-Through | Sliding (pas de jitter) | Auto TTL |
 
-### Phase 4 — Résilience Transversale Resilience4j
+## I.7 Résilience Transversale — Resilience4j
 
 | Service externe | Circuit Breaker | Retry | Bulkhead | Timeout |
 |----------------|-----------------|-------|----------|---------|
@@ -706,9 +688,7 @@ Dans Grafana, les alertes de lag utilisent ces group IDs :
 
 États Circuit Breaker : `CLOSED` → `OPEN` (fail-fast + fallback) → `HALF_OPEN` (test rétablissement)
 
-## Module 1.C — Persistance & Standards
-
-### Phase 1 — Observabilité Transversale
+## I.8 Observabilité Transversale
 
 **Métriques Micrometer exposées Prometheus :**
 - `docai_document_upload_total{tenant, type}` — compteur uploads
@@ -779,7 +759,7 @@ Dans Grafana, les alertes de lag utilisent ces group IDs :
 - Kafka consumer lag > 1 000 messages → Slack
 - Valkey cache hit ratio < 30% → Slack
 
-### Phase 2 — MongoDB
+## I.9 Persistance — Pourquoi MongoDB et pas SQL ?
 
 MongoDB est choisi pour trois raisons structurelles liées au domaine DocAI.
 
@@ -995,7 +975,7 @@ Tous les index sont créés par **Mongock** (migrations versionnées). `auto-ind
 
 ---
 
-### Phase 3 — Stratégie de Versioning API
+## I.10 — Stratégie de Versioning de l API
 
 > **Où :** Cette section s applique à tous les endpoints exposés dans le Module 6 et à toute évolution future de l API publique.
 
@@ -1026,22 +1006,23 @@ Tous les index sont créés par **Mongock** (migrations versionnées). `auto-ind
 | BR-VER-005 | Headers Deprecation et Sunset sur les endpoints dépréciés | MUST |
 
 
-# PARTIE 2 — Mise en place & CI/CD
+# PARTIE 1 — MISE EN PLACE (avant tout code)
 
 > **Ordre obligatoire :**
-> 1. **Module 2.A — Créer le projet** (structure Maven, Docker, infrastructure locale)
-> 2. **Module 2.B — Configurer les standards** (Clean Code, CI/CD, Feature Flags, environnements)
-> 3. **Module 2.C — Valider le pipeline CI/CD** (premier build vert end-to-end)
+> 1. **0.A — Créer le projet** (structure Maven, Docker, infrastructure locale)
+> 2. **0.B — Configurer les standards** (Clean Code, CI/CD, Feature Flags, environnements)
+> 3. **0.C — Valider le pipeline CI/CD** (premier build vert end-to-end)
 >
 > **Aucun module métier ne doit être démarré avant que ces 3 étapes soient validées.**
 
 ---
 
-## Module 2.A — Setup Projet
+## 0.A — Création du Projet (Setup)
 
 > **Première étape absolue.** Sans infrastructure locale fonctionnelle, impossible de démarrer.
 
-### Phase 1 — Prérequis système
+
+### Prérequis système
 
 | Prérequis | Version minimale | Vérification |
 |-----------|-----------------|-------------|
@@ -1069,7 +1050,7 @@ Tous les index sont créés par **Mongock** (migrations versionnées). `auto-ind
 | 3200 | Grafana Tempo |
 | 4317 | OpenTelemetry Collector |
 
-### Phase 2 — Structure projet (arborescence complète)
+### Structure du projet — arborescence complète
 
 ```
 docai-parent/
@@ -1127,7 +1108,7 @@ docai-parent/
         └── test/resources/features/         ← Fichiers .feature Cucumber
 ```
 
-### Phase 3 — docker-compose.yml (infrastructure locale)
+### docker-compose.yml — Infrastructure locale
 
 ```yaml
 # DocAI — Infrastructure de développement locale
@@ -1405,7 +1386,7 @@ services:
   #           .withServices(S3);
 ```
 
-### Phase 4 — .env.example (variables d'environnement)
+### .env.example — Variables d'environnement
 
 ```bash
 # ─── MongoDB ───────────────────────────────────────
@@ -1449,7 +1430,7 @@ APP_BASE_URL=http://localhost:8080
 
 **Règle impérative :** `.env` dans `.gitignore`. Vérifier avant chaque commit que les secrets ne sont pas dans Git.
 
-### Phase 5 — Commandes de démarrage
+### Commandes de démarrage
 
 ```bash
 # 1. Cloner le projet
@@ -1496,10 +1477,11 @@ docker compose logs -f keycloak
 docker compose logs -f mongodb
 ```
 
-### Phase 6 — Vérification de l'installation
+### Vérification de l'installation
 
 | Service | URL / Commande | Résultat attendu |
 |---------|----------------|-----------------|
+### Vérification de l installation
 
 | Kafka UI | http://localhost:8090 | 8 topics DocAI visibles |
 | Keycloak | http://localhost:8180/health/ready | `{"status":"UP"}` |
@@ -1515,7 +1497,7 @@ docker compose logs -f mongodb
 
 ---
 
-### Phase 7 — Gestion des environnements DEV / STAGING / PRODUCTION
+### **Gestion des Environnements — DEV / STAGING / PRODUCTION**
 
 > **Où :** Cette section est la référence unique pour toutes les différences de configuration entre environnements. Tout développeur qui configure un service doit s'y référer.
 
@@ -1563,7 +1545,7 @@ Avant de configurer un service (Keycloak, S3, Stripe, LLM), vérifier dans ce ta
 
 ---
 
-### Phase 8 — Données de test & Seeding
+### **Données de Test — Seeding DEV & STAGING**
 
 > **Où :** À créer en Section 0.A juste après la vérification de l'installation. Sans données de test, chaque développeur crée les siennes manuellement et perd du temps.
 
@@ -1641,7 +1623,7 @@ curl http://localhost:8080/v1/public/auth/login   -d '{"email":"admin@acme-corp.
 
 ---
 
-### Phase 9 — Configuration Keycloak realm-docai.json
+### **Configuration Keycloak — realm-docai.json**
 
 > **Où :** Fichier à créer dans `docker/keycloak/realm-docai.json`. Importé automatiquement au démarrage du conteneur Keycloak local.
 
@@ -1722,7 +1704,7 @@ Si le fichier n'existe pas encore :
 
 ---
 
-### Phase 10 — application.yml complet
+### **application.yml — Configuration Spring Boot Complète**
 
 > **Où :** `docai-bootstrap/src/main/resources/`
 > Ces fichiers sont la configuration de référence. Les valeurs sensibles sont toujours des variables d'environnement — jamais en dur.
@@ -2021,7 +2003,7 @@ docai:
 ```
 
 
-## Module 2.B — Standards & Qualité
+## 0.B — Standards, Qualité & Feature Flags
 
 > **À configurer avant d'écrire la première ligne de code métier.**
 > Ces standards s'appliquent à TOUS les modules. Les configurer maintenant évite de devoir corriger des centaines de fichiers plus tard.
@@ -2058,13 +2040,13 @@ void should_send_to_dlq_when_all_retry_attempts_exhausted()
 
 ---
 
-## Module 2.C — CI/CD Pipeline
+## 0.C — CI/CD Pipeline
 
 > **À valider avec un premier build vert avant de démarrer le Module 0.**
 > Le pipeline CI/CD est le filet de sécurité de tout le projet. Sans lui, impossible de garantir la qualité.
 
 
-### Phase 1 — Vue d'ensemble du pipeline
+### Vue d'ensemble du pipeline
 
 ```
 git push (any branch)
@@ -2113,7 +2095,7 @@ git push (any branch)
 └──────────── (tags uniquement) ──────────┘
 ```
 
-### Phase 2 — Déclencheurs par branche
+### Déclencheurs par branche
 
 | Événement | Phase 1 | Phase 2 | Phase 3 | Phase 4 | Phase 5 | Phase 6 |
 |-----------|---------|---------|---------|---------|---------|---------|
@@ -2122,7 +2104,7 @@ git push (any branch)
 | Push main | ✅ | ✅ | ✅ | ✅ | ✅ Prod (approbation) | ❌ |
 | Tag v*.*.* | ✅ | ✅ | ✅ | ✅ | ✅ Prod | ✅ |
 
-### Phase 3 — Stratégie de branches GitFlow
+### Stratégie de branches — GitFlow adapté
 
 | Branche | Protection | CI | Déploiement |
 |---------|-----------|-----|------------|
@@ -2145,7 +2127,7 @@ chore: upgrade Spring Boot to 4.0.1
 perf(cache): increase Valkey TTL for LLM results
 ```
 
-### Phase 4 — Secrets & Variables GitHub
+### Secrets & Variables GitHub
 
 **Repository Secrets :**
 
@@ -2194,7 +2176,7 @@ perf(cache): increase Valkey TTL for LLM results
 > **Référence complète :** Annexe E — ADR-008
 > ---
 
-### Phase 5 — Quality Gates (seuils de blocage)
+### Quality Gates — Seuils de blocage
 
 | Phase | Condition | Conséquence |
 |-------|-----------|-------------|
@@ -2211,7 +2193,7 @@ perf(cache): increase Valkey TTL for LLM results
 | Deploy Production | Approbation manuelle non reçue dans 1h | ⚠️ Timeout, annulé |
 | Deploy Production | Health check KO | ⚠️ Rollback + alerte critique |
 
-### Phase 6 — Dockerfile multi-stage
+### Dockerfile multi-stage
 
 ```dockerfile
 # ─── Stage 1 : Dépendances Maven (cache) ───────────────────────────────────
@@ -2258,7 +2240,7 @@ ENTRYPOINT ["java", \
 
 ---
 
-### Phase 7 — GitHub Actions Workflows complets
+### **GitHub Actions — Fichiers de Workflow Complets**
 
 > **Où :** Créer dans `.github/workflows/`. Ces fichiers définissent exactement les 6 phases du pipeline CI/CD.
 
@@ -2611,7 +2593,7 @@ jobs:
 ```
 
 
-### Phase 8 — sonar-project.properties
+### sonar-project.properties
 
 ```properties
 sonar.projectKey=${SONAR_PROJECT_KEY}
@@ -2639,7 +2621,7 @@ sonar.coverage.exclusions=\
 
 ---
 
-### Phase 9 — Contract Testing Frontend/Backend
+### **Contract Testing Frontend/Backend — Stabilité des APIs**
 
 > **Où :** À intégrer dans le pipeline CI/CD dès que le Module 6 (API Publique) est développé. Empêche le frontend de casser silencieusement quand le backend change.
 
@@ -2705,7 +2687,7 @@ Ajouter dans `01-ci.yml` un job dédié `contract-tests` :
 
 ---
 
-### Phase 10 — Infrastructure as Code Terraform
+### **Infrastructure as Code — Terraform**
 
 > **Où :** À créer en même temps que la Section 0.A (Création du projet). L'infrastructure doit être versionnée comme le code — jamais créée manuellement en production.
 
@@ -2843,7 +2825,7 @@ terraform apply
 
 ---
 
-### Phase 11 — Kubernetes manifestes
+### **Kubernetes — Contenu des Manifestes**
 
 > **Où :** À créer en Section 0.C après le setup Terraform. Les manifestes Kubernetes définissent comment l'application tourne en staging et production.
 
@@ -2970,7 +2952,7 @@ Pod Spring Boot
 
 ---
 
-### Phase 12 — Health Checks détaillés
+### **Health Checks Détaillés — Stratégie par Service**
 
 > **Où :** À configurer en Section 0.C en même temps que les manifestes Kubernetes. Les health checks sont la base du zero-downtime et du monitoring en production.
 
@@ -3081,7 +3063,7 @@ Spring Boot n'a pas de health check S3 natif. Créer `S3HealthIndicator` qui imp
 | BR-HC-006 | Chaque composant DOWN déclenche une alerte Grafana avec runbook associé | MUST |
 
 
-### Phase 4 — Pull Request Template
+### Pull Request Template — `.github/pull_request_template.md`
 
 ```markdown
 ## Description
@@ -3126,7 +3108,7 @@ Spring Boot n'a pas de health check S3 natif. Créer `S3HealthIndicator` qui imp
 
 ---
 
-### Phase 3 — Definition of Ready (DoR)
+### **Definition of Ready (DoR) — Critères obligatoires avant de commencer une User Story**
 
 > **Où :** Cette section s'applique à TOUTES les User Stories de tous les modules.
 > Un développeur NE DOIT PAS commencer à coder si l'un de ces critères n'est pas rempli.
@@ -3163,7 +3145,7 @@ Avant chaque sprint planning, vérifier cette checklist pour chaque US prévue a
 
 ---
 
-### Phase 2 — Templates Emails Amazon SES
+### **Templates Emails Amazon SES — Standard Obligatoire**
 
 > **Où :** À définir avant le Module 0 car les premiers emails (bienvenue, invitation) sont envoyés dès la Phase 0.1 Inscription. Sans templates standardisés, chaque développeur code un email différemment.
 
@@ -3263,7 +3245,7 @@ Chaque email doit contenir :
 | BR-EMAIL-006 | Les templates sont versionnés dans le dépôt Git comme le code | MUST |
 
 
-### Phase 1 — Feature Flags (stratégie de déploiement progressif)
+### **Feature Flags — Stratégie de Déploiement Progressif**
 
 > **Où :** Cette stratégie s'applique dès le Module 0.2 (BILLING_ENABLED) et s'étend à tous les nouveaux modules. À configurer avant le premier déploiement en production.
 
@@ -3331,7 +3313,7 @@ Si un module cause des incidents en production :
 - Module 5.4 → `dashboard.search.enabled` pour la recherche full-text
 - Tous les modules → `maintenance.mode` kill switch global
 
-### Phase 5 — Definition of Done CI/CD
+### Definition of Done — CI/CD (Setup initial)
 
 - [ ] Dépôt GitHub créé avec protections branches (develop, main)
 - [ ] SonarCloud configuré : organisation, projet importé, token généré
@@ -3356,7 +3338,7 @@ Si un module cause des incidents en production :
 
 ---
 
-# PARTIE 3 — Commons
+# PARTIE 2 — COMMONS (avant tout module métier)
 
 > **Ordre obligatoire :** Les 7 commons doivent être implémentés et testés avant de démarrer le Module 0.
 >
@@ -3368,7 +3350,7 @@ Si un module cause des incidents en production :
 > **Les commons sont extraits de l'Annexe D et constituent une librairie Maven partagée `fr.docai:docai-commons`.**
 
 
-## Module 3.A — Composants Réutilisables
+## 0.D — Composants Réutilisables (Commons)
 
 > **Référence complète :** Voir Annexe D pour les interfaces et spécifications de chaque commons.
 
@@ -3398,13 +3380,13 @@ Si un module cause des incidents en production :
 
 ---
 
-### Interfaces Java — Signatures obligatoires
+### **Interfaces Java des Commons — Signatures Obligatoires**
 
 > **Où :** À implémenter dans `docai-commons` avant tout module métier. Ces interfaces sont le contrat entre les modules — elles ne changent jamais sans migration.
 
 ---
 
-#### Phase 1 — commons-multitenancy (TenantContext, MongoTenantFilter)
+#### commons-multitenancy — Interfaces
 
 ```java
 // TenantContext — Holder ThreadLocal du tenant courant
@@ -3442,7 +3424,7 @@ public interface TokenBlacklistPort {
 
 ---
 
-#### Phase 2 — commons-api (GlobalExceptionHandler, ProblemDetail RFC 7807)
+#### commons-api — Interfaces
 
 ```java
 // ApiResponse — Enveloppe standard de réponse
@@ -3485,7 +3467,7 @@ public interface IdempotencyPort {
 
 ---
 
-#### Phase 5 — commons-outbox (OutboxMessage, OutboxRelay)
+#### commons-outbox — Interfaces
 
 ```java
 // OutboxMessage — Event à publier via Kafka
@@ -3523,7 +3505,7 @@ public interface OutboxEventPublisher {
 
 ---
 
-#### Phase 3 — commons-audit (@Audited, AuditEntry append-only)
+#### commons-audit — Interfaces
 
 ```java
 // AuditEvent — Event d'audit immuable
@@ -3560,7 +3542,7 @@ public @interface Audited {
 
 ---
 
-#### Phase 6 — commons-quota (@QuotaProtected, script Lua atomique)
+#### commons-quota — Interfaces
 
 ```java
 // QuotaStatus — Résultat de la vérification quota
@@ -3596,7 +3578,7 @@ public @interface QuotaProtected {
 
 ---
 
-#### Phase 4 — commons-kafka (ResilientKafkaConsumer, DLQ)
+#### commons-kafka — Interfaces
 
 ```java
 // ResilientKafkaConsumer — Consumer résilient (à étendre)
@@ -3637,7 +3619,7 @@ public final class JitterTtl {
 
 ---
 
-#### Phase 7 — commons-testing (AbstractIntegrationTest, TestBuilders)
+#### commons-testing — Interfaces
 
 ```java
 // AbstractIntegrationTest — Base pour tous les tests d'intégration
@@ -3711,7 +3693,7 @@ Ces composants peuvent être extraits dans un artifact Maven partagé `fr.docai:
 
 ---
 
-# PARTIE 4 — Fondations Métier
+# PARTIE 3 — FONDATIONS MÉTIER
 
 > **Ordre obligatoire :**
 > 1. **Module 0 — Sécurité & Multi-Tenancy** (avec Login, Inscription, Gestion équipe, RGPD)
@@ -3721,7 +3703,7 @@ Ces composants peuvent être extraits dans un artifact Maven partagé `fr.docai:
 
 ---
 
-## Module 0 — Sécurité & Multi-Tenancy
+## Module 0 — Sécurité & Multi-Tenancy (Fondation transversale)
 
 > **À implémenter EN PREMIER, avant tout endpoint métier.**  
 > Si vous codez 3 modules sans cette fondation, vous devrez tout reprendre : endpoints, requêtes MongoDB, tests, gestion des erreurs.
@@ -4667,7 +4649,7 @@ Feature: Profil utilisateur et sécurité du compte
 
 ---
 
-### Phase 0.5 — Accès Support Client / Impersonation
+### **Accès Support Client aux Données Tenant (RGPD)**
 
 > **Où :** Cette section définit comment l'équipe support DocAI peut accéder aux données d'un tenant pour reproduire un bug ou résoudre un incident, sans violer l'isolation des données ni le RGPD.
 
@@ -4750,7 +4732,7 @@ L'équipe support ne peut accéder aux données d'un tenant que si les 3 conditi
 
 ---
 
-## Module 0.5 — RGPD & Privacy
+## Module 0.3 — RGPD & Privacy
 
 > **Bounded Context :** Garantir la conformité légale au Règlement Général sur la Protection des Données pour tous les tenants européens.
 
@@ -5088,7 +5070,7 @@ Suppression asynchrone :
 
 ---
 
-# PARTIE 5 — Pipeline de Traitement
+# PARTIE 4 — PIPELINE DE TRAITEMENT
 
 > **Ordre obligatoire de développement :**
 > 1. **Module 1 — Reconnaissance** (Upload + Classification)
@@ -5351,7 +5333,7 @@ Feature: Upload et validation de documents
 
 ---
 
-### Phase 1.2 — Classification Automatique IA
+### Phase 1.2 — Classification Automatique par IA
 
 **Objectif :** Identifier automatiquement le type de document via un modèle de vision, avec score de confiance, routing adapté et résilience si le modèle est indisponible.
 
@@ -6266,7 +6248,7 @@ Feature: Détection de fraude — scoring automatique
 ---
 
 
-### Phase 3.2 — Analyseurs Avancés : Apache Tika + Visuel
+### Phase 3.2 — Analyseurs Avancés : Apache Tika + Analyse Visuelle
 
 **Objectif :** Détecter les falsifications via les métadonnées du fichier (Apache Tika) et l'analyse visuelle du contenu (algorithmes d'image processing).
 
@@ -6392,7 +6374,7 @@ Chaque analyseur visuel doit être enveloppé dans un try-catch :
 
 ---
 
-### Phase 3.3 — Workflow Révision Humaine
+### Phase 3.3 — Workflow de Révision Humaine
 
 **Objectif :** Permettre aux `FRAUD_REVIEWER` de statuer sur les documents suspects avec State Machine auditée et notifications temps réel.
 
@@ -6793,7 +6775,7 @@ COMPLETED ──── Webhook livré ──── Fin
 
 ---
 
-# PARTIE 6 — Produit & Monétisation
+# PARTIE 5 — PRODUIT & MONÉTISATION
 
 > **Ordre obligatoire :**
 > 1. **Module 5 — Dashboard & Reporting** (Read Model, SSE, Notifications)
@@ -6937,7 +6919,7 @@ Cette collection est une projection dénormalisée, mise à jour par le `Dashboa
 
 ---
 
-### Phase 5.2 — Alertes Temps Réel SSE
+### Phase 5.2 — Alertes Temps Réel (SSE)
 
 **Objectif :** Envoyer les alertes fraude aux clients frontend en < 2s via Server-Sent Events.
 
@@ -7252,7 +7234,7 @@ Cette collection est une projection dénormalisée, mise à jour par le `Dashboa
 
 ---
 
-### Phase 5.4 — Fonctionnalités Avancées Backlog v2
+### Phase 5.4 — Fonctionnalités Avancées (Backlog v2)
 
 > Ces fonctionnalités sont prévues pour la **version 2** de DocAI. Elles sont spécifiées ici pour anticiper les décisions d'architecture.
 
@@ -7390,9 +7372,7 @@ POST /v1/admin/tenants/{tenantId}/extend-trial
 **Durée estimée :** 2 semaines
 
 
-### Phase 7.1 — Plans & Tarification
-
-#### Flow — Proposition de plan au TENANT_ADMIN (fin période FREE)
+### Flow — Proposition de plan au TENANT_ADMIN (fin période FREE)
 
 Le TENANT_ADMIN est la **seule personne** qui reçoit les propositions de plan et qui peut souscrire. C'est lui qui gère l'abonnement de son entreprise.
 
@@ -7466,7 +7446,7 @@ Alice clique "Choisir Starter"
 
 > ⚠️ **Feature Flags** — Le flag `billing.enabled` est le premier flag à configurer dans Unleash. Voir Section 0.B — Feature Flags pour la procédure de déploiement progressif et le kill switch.
 
-#### Principe fondamental — Billing Feature Flag
+### Principe fondamental — Billing Feature Flag
 
 **Le billing est contrôlé par un Feature Flag global activable/désactivable sans redéploiement.**
 
@@ -7489,7 +7469,7 @@ Cela permet de lancer DocAI en mode **totalement gratuit** pendant la phase de t
 
 ---
 
-#### Plans & Tarification — Modèle Hybride
+### Plans & Tarification — Modèle Hybride
 
 Le modèle hybride combine un **abonnement mensuel fixe** (revenus prévisibles) et une **facturation à l'usage** au-delà du quota inclus (croissance avec le client).
 
@@ -7507,7 +7487,7 @@ Le modèle hybride combine un **abonnement mensuel fixe** (revenus prévisibles)
 
 ---
 
-#### Business Rules — Billing
+### Business Rules — Billing
 
 | ID | Règle | Priorité |
 |----|-------|---------|
@@ -7526,9 +7506,7 @@ Le modèle hybride combine un **abonnement mensuel fixe** (revenus prévisibles)
 
 ---
 
-### Phase 7.2 — Cycle de vie & Stripe
-
-#### Cycle de vie d'un abonnement
+### Cycle de vie d'un abonnement
 
 ```
 Inscription
@@ -7560,7 +7538,7 @@ FREE (30 jours d'essai)
 
 ---
 
-#### Intégration Stripe
+### Intégration Stripe
 
 **Pourquoi Stripe ?**
 - Standard mondial du paiement SaaS
@@ -7582,7 +7560,7 @@ FREE (30 jours d'essai)
 
 ---
 
-#### Calcul de la facture mensuelle
+### Calcul de la facture mensuelle
 
 ```
 Exemple tenant Pro — mois d'octobre :
@@ -7602,9 +7580,7 @@ Total facturé           : 199.00€ + 96.00€ = 295.00€
 
 ---
 
-### Phase 7.3 — Use Cases & BDD
-
-#### Use Cases — Billing
+### Use Cases — Billing
 
 **UC-BIL-001 — Choisir un plan (après période FREE)**
 
@@ -7635,7 +7611,7 @@ Total facturé           : 199.00€ + 96.00€ = 295.00€
 
 ---
 
-#### Scénarios BDD — Billing
+### Scénarios BDD — Billing
 
 ```gherkin
 Feature: Billing et abonnements — modèle hybride
@@ -7682,7 +7658,7 @@ Feature: Billing et abonnements — modèle hybride
 
 ---
 
-#### Emails transactionnels — Billing
+### Emails transactionnels — Billing
 
 | Déclencheur | Destinataire | Contenu |
 |-------------|-------------|---------|
@@ -7695,7 +7671,7 @@ Feature: Billing et abonnements — modèle hybride
 
 ---
 
-#### Architecture Hexagonale — Module 7
+### Architecture Hexagonale — Module 0.2
 
 **Domain Model :**
 - `Subscription` — Aggregate (tenantId, plan, status, stripeCustomerId, stripeSubscriptionId, currentPeriodStart, currentPeriodEnd)
@@ -7820,15 +7796,13 @@ Feature: Billing et abonnements — modèle hybride
 
 ---
 
-# PARTIE 7 — Annexes
-
-## Module 7.A — Roadmap & Checklists
+# Annexes — Référence Technique
 
 > **Les annexes sont des documents de référence.** Elles ne contiennent pas de code à développer mais des standards, décisions et checklists à consulter pendant le développement.
 
 ---
 
-### Phase 1 — Roadmap Globale Backend (Annexe A)
+## Annexe A — Roadmap Globale Backend
 
 | Phase | Module | Objectif | Durée | Semaines |
 |-------|--------|----------|-------|---------|
@@ -7862,7 +7836,7 @@ Avec une équipe de 2 développeurs backend seniors, les phases peuvent être pa
 
 ---
 
-### Phase 2 — Production Readiness Checklist (Annexe C)
+## Annexe C — Production Readiness Checklist
 
 **Sécurité :**
 - [ ] Secrets managés via AWS Secrets Manager ou HashiCorp Vault (pas de `.env` en production)
@@ -7936,7 +7910,7 @@ Avec une équipe de 2 développeurs backend seniors, les phases peuvent être pa
 
 ---
 
-### Phase 3 — Rotation des Secrets Applicatifs
+### **Rotation des Secrets Applicatifs**
 
 > **Où :** À planifier avant le lancement. La rotation des secrets applicatifs est distincte de la rotation des clés KMS (ADR-005) — elle concerne les credentials d'accès aux APIs externes.
 
@@ -7979,7 +7953,7 @@ Configurer une alerte dans AWS Secrets Manager si un secret n'a pas été rotat�
 
 ---
 
-### Phase 4 — Chaos Engineering (scénarios de panne)
+### **Chaos Engineering — Scénarios de Panne Planifiés**
 
 > **Où :** À intégrer dans le planning de release. Tester les pannes avant qu'elles arrivent en production.
 
@@ -8018,7 +7992,7 @@ En production (avec précaution) : uniquement les scénarios #5 (tuer un pod) et
 
 ---
 
-### Phase 5 — Publication OpenAPI (portail développeur)
+### **Publication OpenAPI — Portail Développeur**
 
 > **Où :** À configurer dans le workflow CI/CD Phase 6 (Documentation). Permet aux clients B2B d'intégrer l'API sans aide manuelle.
 
@@ -8070,7 +8044,7 @@ Chaque endpoint doit avoir dans la spec :
 | BR-OAS-006 | Un SDK client est généré et publié pour les releases majeures | SHOULD |
 
 
-## Module 7.B — ADR — Décisions Architecturales (Annexe E)
+## Annexe E — Décisions Architecturales Critiques (ADR)
 
 > **ADR = Architecture Decision Record**  
 > Ces 4 problèmes ont été identifiés comme des **bugs architecturaux garantis en production** s'ils ne sont pas traités avant le démarrage du développement.
@@ -8640,11 +8614,11 @@ POST /v1/admin/read-model/rebuild
 
 ---
 
-## Module 7.C — Standards Opérationnels (Annexe F)
+## Annexe F — Contacts, Responsabilités & Standards Opérationnels
 
 ---
 
-### Phase 1 — Stratégie Sauvegarde & Disaster Recovery
+### **F.1 — Stratégie de Sauvegarde et Disaster Recovery**
 
 > **Où :** À configurer avant le premier déploiement production. Vérifier à chaque release.
 
@@ -8679,7 +8653,7 @@ POST /v1/admin/read-model/rebuild
 
 ---
 
-### Phase 2 — Politique Dépendances & Mises à jour
+### **F.2 — Politique de Dépendances et Mises à Jour**
 
 > **Où :** S'applique à tous les modules. À vérifier chaque semaine avec Dependabot.
 
@@ -8702,7 +8676,7 @@ POST /v1/admin/read-model/rebuild
 
 ---
 
-### Phase 3 — Politique Branches Hotfixes
+### **F.3 — Politique de Branches pour les Hotfixes**
 
 > **Où :** Procédure en cas de bug critique en production. À connaître par toute l'équipe.
 
@@ -8729,7 +8703,7 @@ POST /v1/admin/read-model/rebuild
 
 ---
 
-### Phase 4 — SLA documenté et publié
+### **F.4 — SLA Documenté et Publié**
 
 > **Où :** À publier sur la status page avant le lancement public.
 
@@ -8759,7 +8733,7 @@ POST /v1/admin/read-model/rebuild
 
 ---
 
-### Phase 5 — Glossaire Métier
+### **F.5 — Glossaire Métier**
 
 > **À lire en priorité par tout nouveau développeur avant de toucher au code.**
 
@@ -8786,7 +8760,7 @@ POST /v1/admin/read-model/rebuild
 
 ---
 
-### Phase 6 — Guide Onboarding Développeur
+### **F.6 — Guide d'Onboarding Développeur**
 
 > **Objectif : environnement fonctionnel en moins d'une heure.**
 
@@ -8826,7 +8800,7 @@ POST /v1/admin/read-model/rebuild
 
 ---
 
-### Phase 7 — Contacts & Responsabilités
+### **F.7 — Contacts et Responsabilités**
 
 | Rôle | Responsabilité | Contact urgence |
 |------|---------------|----------------|
@@ -8845,11 +8819,11 @@ POST /v1/admin/read-model/rebuild
 
 ---
 
-## Module 7.D — Tests & i18n (Annexe G)
+## Annexe G — Tests de Performance & Internationalisation (Backlog v2)
 
 ---
 
-### Phase 1 — Stratégie Tests de Charge k6
+### G.1 — Stratégie de Tests de Charge
 
 > **Où intégrer dans le dev :** Les tests de charge s'exécutent en staging avant chaque release production. Ils doivent être créés en même temps que chaque module exposant un endpoint public.
 
@@ -8934,7 +8908,7 @@ Les tests de charge s'exécutent dans un job CI dédié `06-performance.yml` :
 
 ---
 
-### Phase 2 — Internationalisation i18n (Backlog v2)
+### G.2 — Internationalisation (i18n) — Backlog v2
 
 > **Statut :** Non prioritaire pour le lancement. À planifier pour la v2 lors de l'expansion internationale.
 
