@@ -50,6 +50,7 @@ Thumbs.db
 ehthumbs.db
 Desktop.ini
 .directory
+bash.exe.stackdump
 
 # Environment & Secrets
 .env
