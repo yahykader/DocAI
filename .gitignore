@@ -28,7 +28,9 @@ yarn-error.log*
 *.iws
 *.ipr
 .vscode/
-.DS_Store
+.vscode/settings.json
+.vscode/launch.json
+.vscode/extensions.json
 *.swp
 *.swo
 *~
@@ -42,11 +44,25 @@ yarn-error.log*
 
 # OS
 .DS_Store
+.AppleDouble
+.LSOverride
 Thumbs.db
-*.log
+ehthumbs.db
+Desktop.ini
+.directory
+
+# Environment & Secrets
 .env
 .env.local
 .env.*.local
+*.key
+*.pem
+*.p8
+*.p12
+*.pfx
+*.jks
+credentials.json
+aws-credentials.json
 
 # Build / dist
 build/
@@ -58,14 +74,64 @@ out/
 
 # Angular specific
 .angular/
+.angular/cache/
+.angular/compiler-cli-cache/
 .ng-build
 .storybook-build
+dist/
+src/environments/environment.prod.ts
+.eslintcache
+*.ngfactory.ts
+*.ngstyle.ts
+*.ngsummary.json
 
-# Testing
+# Testing & Code Quality
 coverage/
 .nyc_output/
 .karma-result.json
 junit.xml
+jacoco.xml
+jacoco/
+pit-reports/
+target/pit-reports/
+mutation-testing-elements/
+.mutation.log
+
+# SonarCloud & Static Analysis
+.scannerwork/
+.sonar/
+.sonarqube/
+sonarqube-results/
+spotbugs-results.xml
+checkstyle-results.xml
+
+# Maven Surefire
+surefire-reports/
+failsafe-reports/
+.surefire/
+
+# Spring Boot
+application.properties.bak
+application.yml.bak
+application-local.properties
+application-local.yml
+*.hprof
+heap-dump*
+.spring-loaded
+spring-loaded.jar
+
+# Kafka & Zookeeper
+kafka-logs/
+zookeeper-data/
+schema-registry-logs/
+.kafka-offset/
+
+# MongoDB & Valkey
+mongodb-data/
+mongo-seed/
+redis-data/
+valkey-data/
+dump.rdb
 
 # Docker
 .docker/
@@ -78,85 +144,62 @@ build/
 # Temporary files
 *.tmp
 *.bak
-*.swp
 .temp/
-
-# Git
-.git/
-
-# IntelliJ
-*.hprof
-*.iml
-.idea_modules/
-out/
-
-# VS Code
-.vscode/
-*.code-workspace
-
-# WebStorm
-.idea/watcherTasks.xml
-
-# Mac
-.AppleDouble
-.LSOverride
-
-# Windows
-Thumbs.db
-ehthumbs.db
-Desktop.ini
-
-# Linux
-.directory
-
-# Sensitive/Local
-*.key
-*.pem
-*.p8
-*.p12
-*.pfx
-*.jks
-!sample.env
-!.env.example
 
 # Application specific
 logs/
-*.log
 .cache/
 temp/
 
 # Maven wrapper
 .mvn/wrapper/maven-wrapper.properties
+mvnw
+mvnw.cmd
 
 # JVM crash logs
 hs_err_pid*.log
+jvm-crash.log
 
-# Playwright
-test-results/
-playwright-report/
-
-# Generated files
-.generate_gradle/
-
-# Lock files (optional - comment out if you want to track)
-# package-lock.json
-# yarn.lock
+# E2E Testing
+e2e-results/
 
 # Storybook
 storybook-static/
 
-# OpenTelemetry
-.otel/
-
-# SonarCloud
-.scannerwork/
-.sonar/
-
-# Gradle
-gradle/
-gradlew
-gradlew.bat
-
-# Custom
+# Speckit & Architecture
 .specify/outputs/
 .specify/logs/
+.specify/cache/
+.specify/workflows/generated/
+.specify/.cache/
+
+# Keycloak & Authentication
+keycloak-exports/
+keycloak-temp/
+auth-logs/
+
+# AWS S3 & Storage
+aws-local/
+s3-local/
+minio-data/
+
+# Performance & Monitoring
+profile-results/
+perf-data/
+metrics/
+
+# IntelliJ additional
+.idea_modules/
+.idea/watcherTasks.xml
+
+# WebStorm specific
+.idea/watcherTasks.xml
+
+# Lock files (optional - uncomment if not tracking)
+# package-lock.json
+# yarn.lock
+
+# Exception patterns
+!sample.env
+!.env.example
+!.mvn/wrapper/maven-wrapper.jar
