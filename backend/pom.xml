@@ -201,7 +201,7 @@
                 <scope>import</scope>
             </dependency>
             <dependency>
-                <groupId>com.github.vladimir-bukhtoyarov</groupId>
+                <groupId>com.bucket4j</groupId>
                 <artifactId>bucket4j-core</artifactId>
                 <version>${bucket4j.version}</version>
             </dependency>
@@ -305,11 +305,6 @@
             <dependency>
                 <groupId>org.keycloak</groupId>
                 <artifactId>keycloak-admin-client</artifactId>
-                <version>${keycloak.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.keycloak</groupId>
-                <artifactId>keycloak-spring-boot-starter</artifactId>
                 <version>${keycloak.version}</version>
             </dependency>
             <dependency>

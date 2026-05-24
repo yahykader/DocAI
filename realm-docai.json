@@ -2,14 +2,7 @@
   "realm": "docai",
   "enabled": true,
   "accessTokenLifespan": 300,
-  "accessCodeLifespan": 60,
-  "refreshTokenMaxReuse": 0,
   "refreshTokenLifespan": 1800,
-  "offlineSessionIdleTimeout": 2592000,
-  "offlineSessionMaxLifespan": 5184000,
-  "accessCodeLifespanUserAction": 300,
-  "actionTokenGeneratedByAdminLifespan": 43200,
-  "actionTokenGeneratedByUserLifespan": 300,
   "defaultRoles": [
     "offline_access",
     "uma_authorization"
@@ -18,75 +11,215 @@
     "password"
   ],
   "passwordPolicy": "length(8) and specialChars(1) and upperCase(1) and lowerCase(1) and digits(1)",
-  "otpPolicyType": "totp",
-  "otpPolicyAlgorithm": "HmacSHA1",
-  "otpPolicyInitialCounter": 0,
-  "otpPolicyDigits": 6,
-  "otpPolicyLookAheadWindow": 1,
-  "otpPolicyPeriod": 30,
-  "otpSupportedApplications": [
-    "FreeOTP",
-    "Google Authenticator"
-  ],
   "users": [
     {
-      "username": "admin",
-      "email": "admin@docai.local",
+      "username": "admin@acme-corp.test",
+      "email": "admin@acme-corp.test",
       "emailVerified": true,
       "enabled": true,
       "firstName": "Admin",
-      "lastName": "User",
+      "lastName": "ACME",
       "credentials": [
         {
           "type": "password",
-          "value": "Admin1234!"
+          "value": "Test1234!",
+          "temporary": false
         }
       ],
       "realmRoles": [
-        "user",
-        "admin"
+        "tenant-admin"
       ],
-      "clientRoles": {
-        "realm-management": [
-          "manage-users",
-          "manage-clients",
-          "manage-events"
-        ],
-        "account": [
-          "manage-account"
-        ]
-      },
       "attributes": {
-        "tenant_id": [
-          "acme-corp"
-        ]
+        "tenant_id": ["acme-corp"]
       }
     },
     {
-      "username": "testuser",
-      "email": "test@acme-corp.local",
+      "username": "analyst@acme-corp.test",
+      "email": "analyst@acme-corp.test",
       "emailVerified": true,
       "enabled": true,
-      "firstName": "Test",
-      "lastName": "User",
+      "firstName": "Analyst",
+      "lastName": "ACME",
       "credentials": [
         {
           "type": "password",
-          "value": "Test1234!"
+          "value": "Test1234!",
+          "temporary": false
         }
       ],
       "realmRoles": [
-        "user"
+        "analyst"
       ],
-      "clientRoles": {
-        "account": [
-          "manage-account"
-        ]
-      },
       "attributes": {
-        "tenant_id": [
-          "acme-corp"
-        ]
+        "tenant_id": ["acme-corp"]
+      }
+    },
+    {
+      "username": "viewer@acme-corp.test",
+      "email": "viewer@acme-corp.test",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Viewer",
+      "lastName": "ACME",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Test1234!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "viewer"
+      ],
+      "attributes": {
+        "tenant_id": ["acme-corp"]
+      }
+    },
+    {
+      "username": "reviewer@acme-corp.test",
+      "email": "reviewer@acme-corp.test",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Fraud Reviewer",
+      "lastName": "ACME",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Test1234!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "fraud-reviewer"
+      ],
+      "attributes": {
+        "tenant_id": ["acme-corp"]
+      }
+    },
+    {
+      "username": "admin@beta-assur.test",
+      "email": "admin@beta-assur.test",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Admin",
+      "lastName": "Beta Assur",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Test1234!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "tenant-admin"
+      ],
+      "attributes": {
+        "tenant_id": ["beta-assur"]
+      }
+    },
+    {
+      "username": "analyst@beta-assur.test",
+      "email": "analyst@beta-assur.test",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Analyst",
+      "lastName": "Beta Assur",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Test1234!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "analyst"
+      ],
+      "attributes": {
+        "tenant_id": ["beta-assur"]
+      }
+    },
+    {
+      "username": "viewer@beta-assur.test",
+      "email": "viewer@beta-assur.test",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Viewer",
+      "lastName": "Beta Assur",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Test1234!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "viewer"
+      ],
+      "attributes": {
+        "tenant_id": ["beta-assur"]
+      }
+    },
+    {
+      "username": "admin@gamma-rh.test",
+      "email": "admin@gamma-rh.test",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Admin",
+      "lastName": "Gamma RH",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Test1234!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "tenant-admin"
+      ],
+      "attributes": {
+        "tenant_id": ["gamma-rh"]
+      }
+    },
+    {
+      "username": "analyst@gamma-rh.test",
+      "email": "analyst@gamma-rh.test",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Analyst",
+      "lastName": "Gamma RH",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Test1234!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "analyst"
+      ],
+      "attributes": {
+        "tenant_id": ["gamma-rh"]
+      }
+    },
+    {
+      "username": "viewer@gamma-rh.test",
+      "email": "viewer@gamma-rh.test",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Viewer",
+      "lastName": "Gamma RH",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Test1234!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "viewer"
+      ],
+      "attributes": {
+        "tenant_id": ["gamma-rh"]
       }
     }
   ],
@@ -94,77 +227,52 @@
     "realm": [
       {
         "name": "admin",
-        "description": "Administrator role"
+        "description": "Administrator role (system-wide)"
       },
       {
-        "name": "user",
-        "description": "User role"
+        "name": "tenant-admin",
+        "description": "Tenant administrator (manage tenant users and settings)"
+      },
+      {
+        "name": "manager",
+        "description": "Manager (oversee operations)"
+      },
+      {
+        "name": "analyst",
+        "description": "Analyst (analyze documents)"
+      },
+      {
+        "name": "viewer",
+        "description": "Viewer (read-only access)"
+      },
+      {
+        "name": "fraud-reviewer",
+        "description": "Fraud reviewer (detect and validate fraud)"
       },
       {
         "name": "offline_access",
-        "description": ""
+        "description": "Offline access"
       },
       {
         "name": "uma_authorization",
-        "description": ""
+        "description": "User-Managed Access authorization"
       }
-    ],
-    "client": {
-      "realm-management": [
-        {
-          "name": "manage-users",
-          "description": "Manage users"
-        },
-        {
-          "name": "manage-clients",
-          "description": "Manage clients"
-        },
-        {
-          "name": "manage-events",
-          "description": "Manage events"
-        }
-      ],
-      "account": [
-        {
-          "name": "manage-account",
-          "description": "Manage account"
-        }
-      ]
-    }
+    ]
   },
   "clients": [
     {
       "clientId": "docai-backend",
-      "name": "DocAI Backend",
-      "description": "Backend API client",
       "enabled": true,
-      "clientAuthenticatorType": "client-secret",
-      "secret": "docai-backend-secret-change-in-prod",
+      "description": "DocAI Backend API",
+      "rootUrl": "http://localhost:8080",
       "redirectUris": [
         "http://localhost:8080/*"
       ],
-      "webOrigins": [
-        "http://localhost:8080"
-      ],
       "publicClient": false,
-      "directAccessGrantsEnabled": true,
-      "standardFlowEnabled": true,
-      "implicitFlowEnabled": false,
-      "serviceAccountsEnabled": true,
-      "bearerOnlyClient": false,
-      "consentRequired": false,
-      "fullScopeAllowed": true,
-      "defaultClientScopes": [
-        "profile",
-        "email"
-      ],
-      "optionalClientScopes": [
-        "address",
-        "phone"
-      ],
+      "bearerOnly": true,
       "protocolMappers": [
         {
-          "name": "tenant_id",
+          "name": "tenant_id mapper",
           "protocol": "openid-connect",
           "protocolMapper": "oidc-usermodel-attribute-mapper",
           "consentRequired": false,
@@ -173,95 +281,28 @@
             "user.attribute": "tenant_id",
             "id.token.claim": "true",
             "access.token.claim": "true",
-            "claim.name": "tenant_id"
-          }
-        },
-        {
-          "name": "email",
-          "protocol": "openid-connect",
-          "protocolMapper": "oidc-usermodel-property-mapper",
-          "consentRequired": false,
-          "config": {
-            "userinfo.token.claim": "true",
-            "user.attribute": "email",
-            "id.token.claim": "true",
-            "access.token.claim": "true",
-            "claim.name": "email"
-          }
-        },
-        {
-          "name": "given name",
-          "protocol": "openid-connect",
-          "protocolMapper": "oidc-usermodel-property-mapper",
-          "consentRequired": false,
-          "config": {
-            "userinfo.token.claim": "true",
-            "user.attribute": "firstName",
-            "id.token.claim": "true",
-            "access.token.claim": false,
-            "claim.name": "given_name"
-          }
-        },
-        {
-          "name": "family name",
-          "protocol": "openid-connect",
-          "protocolMapper": "oidc-usermodel-property-mapper",
-          "consentRequired": false,
-          "config": {
-            "userinfo.token.claim": "true",
-            "user.attribute": "lastName",
-            "id.token.claim": "true",
-            "access.token.claim": false,
-            "claim.name": "family_name"
-          }
-        },
-        {
-          "name": "roles",
-          "protocol": "openid-connect",
-          "protocolMapper": "oidc-usermodel-realm-role-mapper",
-          "consentRequired": false,
-          "config": {
-            "userinfo.token.claim": "true",
-            "multivalued": "true",
-            "user.attribute": "foo",
-            "id.token.claim": "true",
-            "access.token.claim": "true",
-            "claim.name": "roles"
+            "claim.name": "tenant_id",
+            "claim.value.type": "String"
           }
         }
       ]
     },
     {
       "clientId": "docai-frontend",
-      "name": "DocAI Frontend",
-      "description": "Frontend Angular application",
       "enabled": true,
-      "publicClient": true,
+      "description": "DocAI Frontend (Angular)",
+      "rootUrl": "http://localhost:4200",
       "redirectUris": [
         "http://localhost:4200/*",
-        "http://localhost:4200"
+        "http://localhost:4200/auth/callback"
       ],
       "webOrigins": [
         "http://localhost:4200"
       ],
-      "directAccessGrantsEnabled": true,
-      "standardFlowEnabled": true,
-      "implicitFlowEnabled": true,
-      "allowedOrigins": [
-        "http://localhost:4200"
-      ],
-      "defaultClientScopes": [
-        "profile",
-        "email",
-        "openid"
-      ],
-      "optionalClientScopes": [
-        "address",
-        "phone"
-      ],
+      "publicClient": true,
       "protocolMappers": [
         {
-          "name": "tenant_id",
+          "name": "tenant_id mapper",
           "protocol": "openid-connect",
           "protocolMapper": "oidc-usermodel-attribute-mapper",
           "consentRequired": false,
@@ -270,115 +311,37 @@
             "user.attribute": "tenant_id",
             "id.token.claim": "true",
             "access.token.claim": "true",
-            "claim.name": "tenant_id"
-          }
-        },
-        {
-          "name": "email",
-          "protocol": "openid-connect",
-          "protocolMapper": "oidc-usermodel-property-mapper",
-          "consentRequired": false,
-          "config": {
-            "userinfo.token.claim": "true",
-            "user.attribute": "email",
-            "id.token.claim": "true",
-            "access.token.claim": "true",
-            "claim.name": "email"
-          }
-        },
-        {
-          "name": "given name",
-          "protocol": "openid-connect",
-          "protocolMapper": "oidc-usermodel-property-mapper",
-          "consentRequired": false,
-          "config": {
-            "userinfo.token.claim": "true",
-            "user.attribute": "firstName",
-            "id.token.claim": "true",
-            "access.token.claim": false,
-            "claim.name": "given_name"
-          }
-        },
-        {
-          "name": "family name",
-          "protocol": "openid-connect",
-          "protocolMapper": "oidc-usermodel-property-mapper",
-          "consentRequired": false,
-          "config": {
-            "userinfo.token.claim": "true",
-            "user.attribute": "lastName",
-            "id.token.claim": "true",
-            "access.token.claim": false,
-            "claim.name": "family_name"
+            "claim.name": "tenant_id",
+            "claim.value.type": "String"
           }
         }
       ]
     },
     {
       "clientId": "docai-admin",
-      "name": "DocAI Admin",
-      "description": "Admin console client",
       "enabled": true,
-      "publicClient": true,
+      "description": "DocAI Admin Console",
+      "rootUrl": "http://localhost:8080",
       "redirectUris": [
-        "http://localhost:8180/admin/*",
-        "http://localhost:8180/admin"
+        "http://localhost:8080/admin/*"
       ],
-      "webOrigins": [
-        "http://localhost:8180"
-      ],
-      "standardFlowEnabled": true,
-      "implicitFlowEnabled": true,
-      "directAccessGrantsEnabled": false,
-      "defaultClientScopes": [
-        "profile",
-        "email",
-        "openid"
+      "publicClient": false,
+      "protocolMappers": [
+        {
+          "name": "tenant_id mapper",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "tenant_id",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "tenant_id",
+            "claim.value.type": "String"
+          }
+        }
       ]
     }
-  ],
-  "clientScopeMappings": {
-    "realm-management": [
-      {
-        "client": "docai-backend",
-        "roles": [
-          "manage-users",
-          "manage-clients"
-        ]
-      }
-    ]
-  },
-  "smtpServer": {
-    "host": "localhost",
-    "port": 1025,
-    "from": "noreply@docai.local",
-    "auth": false,
-    "ssl": false,
-    "starttls": false
-  },
-  "eventsEnabled": true,
-  "eventsListeners": [
-    "jboss-logging"
-  ],
-  "enabledEventTypes": [
-    "REGISTER",
-    "REGISTER_ERROR",
-    "LOGIN",
-    "LOGIN_ERROR",
-    "CLIENT_LOGIN",
-    "CLIENT_LOGIN_ERROR",
-    "LOGOUT",
-    "LOGOUT_ERROR"
-  ],
-  "internationalizationEnabled": true,
-  "supportedLocales": [
-    "en",
-    "fr"
-  ],
-  "defaultLocale": "en",
-  "userManagedAccessAllowed": true,
-  "attributes": {
-    "cidr.check.disabled": "true",
-    "frontendUrl": "http://localhost:4200"
-  }
+  ]
 }

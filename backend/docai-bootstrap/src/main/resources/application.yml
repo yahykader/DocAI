@@ -4,22 +4,20 @@ spring:
   profiles:
     active: local
 
-  # MongoDB Configuration
+  # Data Configuration (MongoDB + Redis/Valkey)
   data:
     mongodb:
       uri: mongodb://admin:password@localhost:27017/docai?authSource=admin&replicaSet=rs0
       auto-index-creation: true
-
-  # Redis/Valkey Configuration
-  redis:
-    host: localhost
-    port: 6379
-    timeout: 60000ms
-    jedis:
-      pool:
-        max-active: 8
-        max-idle: 8
-        min-idle: 0
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 60000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
 
   # Kafka Configuration
   kafka:
@@ -57,7 +55,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,metrics,prometheus,info,env
+        include: health,metrics,prometheus,info
   metrics:
     export:
       prometheus:
@@ -88,8 +86,8 @@ docai:
   ai:
     provider: anthropic
   stripe:
-    api-key: ${STRIPE_API_KEY}
+    api-key: ${STRIPE_API_KEY:dummy-key-for-local-dev}
   keycloak:
     realm: docai
     admin-username: admin
-    admin-password: ${KEYCLOAK_ADMIN_PASSWORD}
+    admin-password: ${KEYCLOAK_ADMIN_PASSWORD:admin}

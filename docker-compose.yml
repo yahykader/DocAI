@@ -51,17 +51,20 @@ services:
   kafka:
     image: confluentinc/cp-kafka:7.7.0
     container_name: docai-kafka
-    depends_on:
-      - zookeeper
     ports:
       - "9092:9092"
       - "9094:9094"
+      - "29093:29093"
     environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://kafka:9092,PLAINTEXT_INTERNAL://kafka:9094
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+      CLUSTER_ID: MkQkQm5iT0eMzM1ZTAxNGM=
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_NODE_ID: 1
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:29093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://kafka:9092,PLAINTEXT_INTERNAL://kafka:9094,CONTROLLER://kafka:29093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092,PLAINTEXT_HOST://0.0.0.0:9092,PLAINTEXT_INTERNAL://0.0.0.0:9094,CONTROLLER://0.0.0.0:29093
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
@@ -78,26 +81,6 @@ services:
       - docai-network
     volumes:
       - kafka_data:/var/lib/kafka/data
-
-  zookeeper:
-    image: confluentinc/cp-zookeeper:7.7.0
-    container_name: docai-zookeeper
-    ports:
-      - "2181:2181"
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_SYNC_LIMIT: 2
-      ZOOKEEPER_INIT_LIMIT: 5
-    healthcheck:
-      test: [ "CMD", "echo", "stat" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - docai-network
-    volumes:
-      - zookeeper_data:/var/lib/zookeeper/data
-      - zookeeper_logs:/var/lib/zookeeper/log
 
   # Kafka topic initialization (ADR-002: 8 topics, documentId partition key)
   kafka-init:
@@ -194,7 +177,6 @@ services:
     environment:
       KAFKA_CLUSTERS_0_NAME: docai
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
-      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
       KAFKA_CLUSTERS_0_SCHEMAREGISTRY: http://apicurio:8081
     healthcheck:
       test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/health" ]
@@ -380,10 +362,6 @@ volumes:
   mongodb_config:
     driver: local
   kafka_data:
-    driver: local
-  zookeeper_data:
-    driver: local
-  zookeeper_logs:
     driver: local
   valkey_data:
     driver: local

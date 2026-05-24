@@ -168,7 +168,7 @@ class HexagonalArchitectureTest {
                 .layer("adapter-in").definedBy("fr.docai.adapter.in..")
                 .layer("adapter-out").definedBy("fr.docai.adapter.out..")
                 .layer("bootstrap").definedBy("fr.docai.bootstrap..")
-                .whereLayer("domain").mayNotBeAccessedByAnyLayer()
+                .whereLayer("domain").mayOnlyBeAccessedByLayers("application", "adapter-in", "adapter-out", "bootstrap")
                 .whereLayer("application").mayOnlyBeAccessedByLayers("adapter-in", "adapter-out", "bootstrap")
                 .whereLayer("adapter-in").mayNotBeAccessedByLayers("adapter-out", "application", "domain")
                 .whereLayer("adapter-out").mayNotBeAccessedByLayers("adapter-in", "application", "domain")
