@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>fr.docai</groupId>
+        <artifactId>docai-parent</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>docai-bootstrap</artifactId>
+    <name>DocAI Bootstrap</name>
+    <description>Spring Boot Entry Point - Configuration and main application</description>
+
+    <dependencies>
+        <!-- === INTERNAL ADAPTER MODULES (IN/OUT) === -->
+        <dependency>
+            <groupId>fr.docai</groupId>
+            <artifactId>docai-adapter-in-rest</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>fr.docai</groupId>
+            <artifactId>docai-adapter-in-kafka</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>fr.docai</groupId>
+            <artifactId>docai-adapter-out-mongodb</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>fr.docai</groupId>
+            <artifactId>docai-adapter-out-kafka</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>fr.docai</groupId>
+            <artifactId>docai-adapter-out-valkey</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>fr.docai</groupId>
+            <artifactId>docai-adapter-out-ai</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>fr.docai</groupId>
+            <artifactId>docai-adapter-out-storage</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>fr.docai</groupId>
+            <artifactId>docai-adapter-out-external</artifactId>
+        </dependency>
+
+        <!-- === SPRING BOOT CORE === -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <!-- === SECURITY & AUTHENTICATION === -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+        </dependency>
+
+        <!-- === OBSERVABILITY: PROMETHEUS + OPENTELEMETRY === -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-sdk</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-exporter-otlp</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.opentelemetry.instrumentation</groupId>
+            <artifactId>opentelemetry-spring-boot-starter</artifactId>
+        </dependency>
+
+        <!-- === PAYMENTS: STRIPE === -->
+        <dependency>
+            <groupId>com.stripe</groupId>
+            <artifactId>stripe-java</artifactId>
+        </dependency>
+
+        <!-- === CONFIGURATION MANAGEMENT === -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-config-client</artifactId>
+        </dependency>
+
+        <!-- === TESTING === -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- === ARCHITECTURE TESTING === -->
+        <dependency>
+            <groupId>com.tngtech.archunit</groupId>
+            <artifactId>archunit-junit5</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Spring Boot Maven Plugin -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring-boot.version}</version>
+            </plugin>
+
+            <!-- ArchUnit tests for hexagonal architecture validation -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <includes>
+                        <include>**/*Test.java</include>
+                        <include>**/*Tests.java</include>
+                        <include>**/HexagonalArchitectureTest.java</include>
+                    </includes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

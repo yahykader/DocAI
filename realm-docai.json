@@ -1,0 +1,347 @@
+{
+  "realm": "docai",
+  "enabled": true,
+  "accessTokenLifespan": 300,
+  "refreshTokenLifespan": 1800,
+  "defaultRoles": [
+    "offline_access",
+    "uma_authorization"
+  ],
+  "requiredCredentials": [
+    "password"
+  ],
+  "passwordPolicy": "length(8) and specialChars(1) and upperCase(1) and lowerCase(1) and digits(1)",
+  "users": [
+    {
+      "username": "admin@acme-corp.test",
+      "email": "admin@acme-corp.test",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Admin",
+      "lastName": "ACME",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Test1234!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "tenant-admin"
+      ],
+      "attributes": {
+        "tenant_id": ["acme-corp"]
+      }
+    },
+    {
+      "username": "analyst@acme-corp.test",
+      "email": "analyst@acme-corp.test",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Analyst",
+      "lastName": "ACME",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Test1234!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "analyst"
+      ],
+      "attributes": {
+        "tenant_id": ["acme-corp"]
+      }
+    },
+    {
+      "username": "viewer@acme-corp.test",
+      "email": "viewer@acme-corp.test",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Viewer",
+      "lastName": "ACME",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Test1234!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "viewer"
+      ],
+      "attributes": {
+        "tenant_id": ["acme-corp"]
+      }
+    },
+    {
+      "username": "reviewer@acme-corp.test",
+      "email": "reviewer@acme-corp.test",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Fraud Reviewer",
+      "lastName": "ACME",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Test1234!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "fraud-reviewer"
+      ],
+      "attributes": {
+        "tenant_id": ["acme-corp"]
+      }
+    },
+    {
+      "username": "admin@beta-assur.test",
+      "email": "admin@beta-assur.test",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Admin",
+      "lastName": "Beta Assur",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Test1234!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "tenant-admin"
+      ],
+      "attributes": {
+        "tenant_id": ["beta-assur"]
+      }
+    },
+    {
+      "username": "analyst@beta-assur.test",
+      "email": "analyst@beta-assur.test",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Analyst",
+      "lastName": "Beta Assur",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Test1234!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "analyst"
+      ],
+      "attributes": {
+        "tenant_id": ["beta-assur"]
+      }
+    },
+    {
+      "username": "viewer@beta-assur.test",
+      "email": "viewer@beta-assur.test",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Viewer",
+      "lastName": "Beta Assur",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Test1234!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "viewer"
+      ],
+      "attributes": {
+        "tenant_id": ["beta-assur"]
+      }
+    },
+    {
+      "username": "admin@gamma-rh.test",
+      "email": "admin@gamma-rh.test",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Admin",
+      "lastName": "Gamma RH",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Test1234!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "tenant-admin"
+      ],
+      "attributes": {
+        "tenant_id": ["gamma-rh"]
+      }
+    },
+    {
+      "username": "analyst@gamma-rh.test",
+      "email": "analyst@gamma-rh.test",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Analyst",
+      "lastName": "Gamma RH",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Test1234!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "analyst"
+      ],
+      "attributes": {
+        "tenant_id": ["gamma-rh"]
+      }
+    },
+    {
+      "username": "viewer@gamma-rh.test",
+      "email": "viewer@gamma-rh.test",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Viewer",
+      "lastName": "Gamma RH",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Test1234!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "viewer"
+      ],
+      "attributes": {
+        "tenant_id": ["gamma-rh"]
+      }
+    }
+  ],
+  "roles": {
+    "realm": [
+      {
+        "name": "admin",
+        "description": "Administrator role (system-wide)"
+      },
+      {
+        "name": "tenant-admin",
+        "description": "Tenant administrator (manage tenant users and settings)"
+      },
+      {
+        "name": "manager",
+        "description": "Manager (oversee operations)"
+      },
+      {
+        "name": "analyst",
+        "description": "Analyst (analyze documents)"
+      },
+      {
+        "name": "viewer",
+        "description": "Viewer (read-only access)"
+      },
+      {
+        "name": "fraud-reviewer",
+        "description": "Fraud reviewer (detect and validate fraud)"
+      },
+      {
+        "name": "offline_access",
+        "description": "Offline access"
+      },
+      {
+        "name": "uma_authorization",
+        "description": "User-Managed Access authorization"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "docai-backend",
+      "enabled": true,
+      "description": "DocAI Backend API",
+      "rootUrl": "http://localhost:8080",
+      "redirectUris": [
+        "http://localhost:8080/*"
+      ],
+      "publicClient": false,
+      "bearerOnly": true,
+      "protocolMappers": [
+        {
+          "name": "tenant_id mapper",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "tenant_id",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "tenant_id",
+            "claim.value.type": "String"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "docai-frontend",
+      "enabled": true,
+      "description": "DocAI Frontend (Angular)",
+      "rootUrl": "http://localhost:4200",
+      "redirectUris": [
+        "http://localhost:4200/*",
+        "http://localhost:4200/auth/callback"
+      ],
+      "webOrigins": [
+        "http://localhost:4200"
+      ],
+      "publicClient": true,
+      "protocolMappers": [
+        {
+          "name": "tenant_id mapper",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "tenant_id",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "tenant_id",
+            "claim.value.type": "String"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "docai-admin",
+      "enabled": true,
+      "description": "DocAI Admin Console",
+      "rootUrl": "http://localhost:8080",
+      "redirectUris": [
+        "http://localhost:8080/admin/*"
+      ],
+      "publicClient": false,
+      "protocolMappers": [
+        {
+          "name": "tenant_id mapper",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "tenant_id",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "tenant_id",
+            "claim.value.type": "String"
+          }
+        }
+      ]
+    }
+  ]
+}
