@@ -68,7 +68,7 @@
   - Phase 4 — Pull Request Template
   - Phase 5 — Definition of Done CI/CD
 
-- Module 2.C — CI/CD Pipeline (0.C — ligne 2043)
+- Module 2.C — CI/CD Pipeline (0.C — ligne 2043) / (3357)
   - Phase 1 — Vue d'ensemble du pipeline
   - Phase 2 — Déclencheurs par branche
   - Phase 3 — Stratégie de branches GitFlow
