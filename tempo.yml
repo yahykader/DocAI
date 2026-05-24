@@ -1,0 +1,44 @@
+server:
+  http_listen_port: 3200
+  grpc_listen_port: 4317
+
+distributor:
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:4317
+        http:
+          endpoint: 0.0.0.0:4318
+
+ingester:
+  trace_idle_period: 10s
+  max_block_duration: 5m
+
+metrics_generator:
+  registry:
+    external_labels:
+      cluster: 'docai'
+
+storage:
+  trace:
+    backend: local
+    path: /var/tempo/wal
+    wal:
+      path: /var/tempo/wal
+    local:
+      path: /var/tempo/blocks
+
+querier:
+  frontend_worker:
+    frontend_address: localhost:3200
+
+tempo:
+  search:
+    enabled: true
+  search_block_size: 1_500_000
+  max_search_blocks_per_trace: 50
+
+overrides:
+  metrics_generator:
+    processors: [service-graphs, span-metrics]
