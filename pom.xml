@@ -28,27 +28,94 @@
         <module>docai-bootstrap</module>
     </modules>
 
-    <!-- Properties: JDK, Spring Boot, dependency versions -->
+    <!-- Properties: JDK, Spring Boot, dependency versions (ADR-008: Exact Stack) -->
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.plugin.version>3.12.1</maven.compiler.plugin.version>
+
+        <!-- Core Stack: Java 21 + Spring Boot 4.0.x -->
         <spring-boot.version>4.0.0</spring-boot.version>
         <spring-cloud.version>2024.0.0</spring-cloud.version>
+        <java.version>21</java.version>
+
+        <!-- Testing: JUnit 5, Mockito, ArchUnit (1.3.0 per ADR-008) -->
         <junit-jupiter.version>5.10.1</junit-jupiter.version>
         <mockito.version>5.6.1</mockito.version>
-        <archunit.version>1.2.1</archunit.version>
+        <archunit.version>1.3.0</archunit.version>
         <pitest.version>1.14.2</pitest.version>
+        <testcontainers.version>1.20.4</testcontainers.version>
+        <wiremock.version>3.9.1</wiremock.version>
+        <cucumber.version>7.20.1</cucumber.version>
+
+        <!-- Code Quality: Checkstyle, SonarCloud -->
         <checkstyle.version>10.13.0</checkstyle.version>
+        <sonarcloud.maven.plugin.version>3.10.0.2594</sonarcloud.maven.plugin.version>
+
+        <!-- Resilience & Rate Limiting -->
+        <resilience4j.version>2.3.0</resilience4j.version>
+        <bucket4j.version>8.10.1</bucket4j.version>
+
+        <!-- Mapping & Data -->
+        <mapstruct.version>1.6.3</mapstruct.version>
+        <lombok.version>1.18.36</lombok.version>
+
+        <!-- Serialization & Schema -->
+        <avro.version>1.11.4</avro.version>
+        <apicurio.version>2.6.5.Final</apicurio.version>
+        <protobuf.version>3.24.4</protobuf.version>
+
+        <!-- Persistence & Migrations -->
         <mongodb.version>4.11.1</mongodb.version>
+        <mongock.version>5.4.4</mongock.version>
+
+        <!-- Document Processing -->
+        <tess4j.version>5.13.0</tess4j.version>
+        <pdfbox.version>3.0.3</pdfbox.version>
+        <tika.version>2.9.2</tika.version>
+        <javacv.version>1.5.11</javacv.version>
+
+        <!-- Cloud & Storage -->
+        <aws-sdk.version>2.25.70</aws-sdk.version>
+        <spring-cloud-aws.version>3.1.0</spring-cloud-aws.version>
+
+        <!-- Payments & Stripe -->
+        <stripe-java.version>23.10.0</stripe-java.version>
+
+        <!-- Message Queue -->
         <kafka.version>3.7.0</kafka.version>
+
+        <!-- Cache -->
+        <lettuce.version>6.3.1.RELEASE</lettuce.version>
+
+        <!-- Security & Authentication -->
         <keycloak.version>26.0.0</keycloak.version>
+        <jjwt.version>0.12.3</jjwt.version>
+
+        <!-- API Documentation & Contracts -->
+        <springdoc.version>2.8.6</springdoc.version>
+        <spring-cloud-contract.version>4.1.1</spring-cloud-contract.version>
+
+        <!-- LLM Integration -->
+        <langchain4j.version>0.31.0</langchain4j.version>
+
+        <!-- Observability & Metrics -->
+        <micrometer.version>1.13.0</micrometer.version>
+        <opentelemetry.version>1.38.0</opentelemetry.version>
+
+        <!-- Maven Plugin Versions -->
+        <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
+        <maven-surefire-plugin.version>3.1.2</maven-surefire-plugin.version>
+        <maven-failsafe-plugin.version>3.1.2</maven-failsafe-plugin.version>
+        <maven-shade-plugin.version>3.5.0</maven-shade-plugin.version>
+        <jacoco-maven-plugin.version>0.8.10</jacoco-maven-plugin.version>
     </properties>
 
-    <!-- Dependency Management: Centralized versions for all modules -->
+    <!-- Dependency Management: Centralized versions for all modules (ADR-008) -->
     <dependencyManagement>
         <dependencies>
-            <!-- Spring Boot BOM -->
+            <!-- === SPRING BOM IMPORTS === -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
@@ -57,7 +124,6 @@
                 <scope>import</scope>
             </dependency>
 
-            <!-- Spring Cloud BOM -->
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-dependencies</artifactId>
@@ -66,14 +132,249 @@
                 <scope>import</scope>
             </dependency>
 
-            <!-- MongoDB Driver -->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-aws-dependencies</artifactId>
+                <version>${spring-cloud-aws.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- === INTERNAL MODULES === -->
+            <dependency>
+                <groupId>fr.docai</groupId>
+                <artifactId>docai-domain</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>fr.docai</groupId>
+                <artifactId>docai-application</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>fr.docai</groupId>
+                <artifactId>docai-adapter-in-rest</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>fr.docai</groupId>
+                <artifactId>docai-adapter-in-kafka</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>fr.docai</groupId>
+                <artifactId>docai-adapter-out-mongodb</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>fr.docai</groupId>
+                <artifactId>docai-adapter-out-kafka</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>fr.docai</groupId>
+                <artifactId>docai-adapter-out-valkey</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>fr.docai</groupId>
+                <artifactId>docai-adapter-out-ai</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>fr.docai</groupId>
+                <artifactId>docai-adapter-out-storage</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>fr.docai</groupId>
+                <artifactId>docai-adapter-out-external</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <!-- === RESILIENCE & RATE LIMITING === -->
+            <dependency>
+                <groupId>io.github.resilience4j</groupId>
+                <artifactId>resilience4j-bom</artifactId>
+                <version>${resilience4j.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.github.vladimir-bukhtoyarov</groupId>
+                <artifactId>bucket4j-core</artifactId>
+                <version>${bucket4j.version}</version>
+            </dependency>
+
+            <!-- === MAPPING & CODE GENERATION === -->
+            <dependency>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct</artifactId>
+                <version>${mapstruct.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct-processor</artifactId>
+                <version>${mapstruct.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <!-- === SERIALIZATION & SCHEMA REGISTRY === -->
+            <dependency>
+                <groupId>org.apache.avro</groupId>
+                <artifactId>avro</artifactId>
+                <version>${avro.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.apicurio</groupId>
+                <artifactId>apicurio-registry-serde-avro</artifactId>
+                <version>${apicurio.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java</artifactId>
+                <version>${protobuf.version}</version>
+            </dependency>
+
+            <!-- === DATA PERSISTENCE === -->
             <dependency>
                 <groupId>org.mongodb</groupId>
                 <artifactId>mongodb-driver-sync</artifactId>
                 <version>${mongodb.version}</version>
             </dependency>
+            <dependency>
+                <groupId>io.mongock</groupId>
+                <artifactId>mongock-bom</artifactId>
+                <version>${mongock.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
 
-            <!-- JUnit 5 -->
+            <!-- === DOCUMENT PROCESSING === -->
+            <dependency>
+                <groupId>net.sourceforge.tess4j</groupId>
+                <artifactId>tess4j</artifactId>
+                <version>${tess4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.pdfbox</groupId>
+                <artifactId>pdfbox</artifactId>
+                <version>${pdfbox.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tika</groupId>
+                <artifactId>tika-core</artifactId>
+                <version>${tika.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.bytedeco</groupId>
+                <artifactId>javacv-platform</artifactId>
+                <version>${javacv.version}</version>
+            </dependency>
+
+            <!-- === CLOUD & AWS === -->
+            <dependency>
+                <groupId>software.amazon.awssdk</groupId>
+                <artifactId>bom</artifactId>
+                <version>${aws-sdk.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- === PAYMENTS === -->
+            <dependency>
+                <groupId>com.stripe</groupId>
+                <artifactId>stripe-java</artifactId>
+                <version>${stripe-java.version}</version>
+            </dependency>
+
+            <!-- === CACHE === -->
+            <dependency>
+                <groupId>io.lettuce</groupId>
+                <artifactId>lettuce-core</artifactId>
+                <version>${lettuce.version}</version>
+            </dependency>
+
+            <!-- === SECURITY & AUTH === -->
+            <dependency>
+                <groupId>org.keycloak</groupId>
+                <artifactId>keycloak-admin-client</artifactId>
+                <version>${keycloak.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.keycloak</groupId>
+                <artifactId>keycloak-spring-boot-starter</artifactId>
+                <version>${keycloak.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-api</artifactId>
+                <version>${jjwt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-impl</artifactId>
+                <version>${jjwt.version}</version>
+                <scope>runtime</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-jackson</artifactId>
+                <version>${jjwt.version}</version>
+                <scope>runtime</scope>
+            </dependency>
+
+            <!-- === API DOCUMENTATION & CONTRACTS === -->
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-starter-webmvc-api</artifactId>
+                <version>${springdoc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+                <version>${springdoc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-contract-dependencies</artifactId>
+                <version>${spring-cloud-contract.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- === LLM INTEGRATION === -->
+            <dependency>
+                <groupId>dev.langchain4j</groupId>
+                <artifactId>langchain4j-bom</artifactId>
+                <version>${langchain4j.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- === OBSERVABILITY === -->
+            <dependency>
+                <groupId>io.micrometer</groupId>
+                <artifactId>micrometer-bom</artifactId>
+                <version>${micrometer.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-bom</artifactId>
+                <version>${opentelemetry.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- === TESTING === -->
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter-api</artifactId>
@@ -86,8 +387,6 @@
                 <version>${junit-jupiter.version}</version>
                 <scope>test</scope>
             </dependency>
-
-            <!-- Mockito -->
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
@@ -100,66 +399,109 @@
                 <version>${mockito.version}</version>
                 <scope>test</scope>
             </dependency>
-
-            <!-- ArchUnit -->
             <dependency>
                 <groupId>com.tngtech.archunit</groupId>
                 <artifactId>archunit-junit5</artifactId>
                 <version>${archunit.version}</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>testcontainers-bom</artifactId>
+                <version>${testcontainers.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.github.tomakehurst</groupId>
+                <artifactId>wiremock-jre8</artifactId>
+                <version>${wiremock.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.cucumber</groupId>
+                <artifactId>cucumber-bom</artifactId>
+                <version>${cucumber.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
-    <!-- Build Plugins (shared across all modules) -->
+    <!-- Build Plugins (shared across all modules) - ADR-008 3 CI Jobs: unit-tests, integration-tests, quality-gates -->
     <build>
         <pluginManagement>
             <plugins>
-                <!-- Maven Compiler Plugin (Java 21) -->
+                <!-- Maven Compiler Plugin (Java 21, MapStruct processor) -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.12.1</version>
+                    <version>${maven.compiler.plugin.version}</version>
                     <configuration>
-                        <source>21</source>
-                        <target>21</target>
+                        <source>${java.version}</source>
+                        <target>${java.version}</target>
+                        <annotationProcessorPaths>
+                            <path>
+                                <groupId>org.mapstruct</groupId>
+                                <artifactId>mapstruct-processor</artifactId>
+                                <version>${mapstruct.version}</version>
+                            </path>
+                            <path>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok</artifactId>
+                                <version>${lombok.version}</version>
+                            </path>
+                        </annotationProcessorPaths>
                     </configuration>
                 </plugin>
 
-                <!-- Spring Boot Maven Plugin -->
+                <!-- Spring Boot Maven Plugin (for docai-bootstrap only, skip elsewhere) -->
                 <plugin>
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>
                     <version>${spring-boot.version}</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>repackage</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
 
-                <!-- Maven Surefire Plugin (Unit Tests) -->
+                <!-- Maven Surefire Plugin (Unit Tests: *Test.java, *Tests.java) -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.1.2</version>
+                    <version>${maven-surefire-plugin.version}</version>
                     <configuration>
                         <includes>
                             <include>**/*Test.java</include>
                             <include>**/*Tests.java</include>
+                            <include>**/*Unit.java</include>
                         </includes>
+                        <excludes>
+                            <exclude>**/*IT.java</exclude>
+                            <exclude>**/*ITs.java</exclude>
+                        </excludes>
                     </configuration>
                 </plugin>
 
-                <!-- Maven Failsafe Plugin (Integration Tests) -->
+                <!-- Maven Failsafe Plugin (Integration Tests: *IT.java, *ITs.java) -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-failsafe-plugin</artifactId>
-                    <version>3.1.2</version>
+                    <version>${maven-failsafe-plugin.version}</version>
                     <configuration>
                         <includes>
                             <include>**/*IT.java</include>
                             <include>**/*ITs.java</include>
+                            <include>**/*Integration.java</include>
                         </includes>
                     </configuration>
                 </plugin>
 
-                <!-- Checkstyle Plugin (Code Quality: 20-line max, 4 params, complexity ≤10) -->
+                <!-- Checkstyle Plugin (Code Quality: max 20-line, 4 params, cyclomatic ≤10) -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-checkstyle-plugin</artifactId>
@@ -178,26 +520,92 @@
                     </configuration>
                 </plugin>
 
-                <!-- PIT Mutation Testing Plugin -->
+                <!-- PIT Mutation Testing Plugin (Domain: 85% threshold) -->
                 <plugin>
                     <groupId>org.pitest</groupId>
                     <artifactId>pitest-maven</artifactId>
                     <version>${pitest.version}</version>
                     <configuration>
                         <mutationThreshold>85</mutationThreshold>
+                        <coverage>80</coverage>
                     </configuration>
+                </plugin>
+
+                <!-- JaCoCo Code Coverage Plugin -->
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>${jacoco-maven-plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>prepare-agent</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>report</id>
+                            <phase>test</phase>
+                            <goals>
+                                <goal>report</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <!-- SonarCloud Plugin (Quality Gate: 0 bugs, 0 vulns, ≤3% duplication) -->
+                <plugin>
+                    <groupId>org.sonarsource.scanner.maven</groupId>
+                    <artifactId>sonar-maven-plugin</artifactId>
+                    <version>${sonarcloud.maven.plugin.version}</version>
                 </plugin>
 
                 <!-- JAR Plugin -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.3.0</version>
+                    <version>${maven-jar-plugin.version}</version>
+                </plugin>
+
+                <!-- Shade Plugin (for fat JARs if needed) -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>${maven-shade-plugin.version}</version>
+                </plugin>
+
+                <!-- Avro Code Generation -->
+                <plugin>
+                    <groupId>org.apache.avro</groupId>
+                    <artifactId>avro-maven-plugin</artifactId>
+                    <version>${avro.version}</version>
+                    <executions>
+                        <execution>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>schema</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <!-- Protocol Buffers Code Generation -->
+                <plugin>
+                    <groupId>org.xolstice.maven.plugins</groupId>
+                    <artifactId>protobuf-maven-plugin</artifactId>
+                    <version>0.6.1</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>compile</goal>
+                                <goal>test-compile</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>
 
-        <!-- Plugins applied to all modules -->
+        <!-- Plugins applied to all modules by default -->
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -207,19 +615,56 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
             </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+            </plugin>
         </plugins>
     </build>
 
-    <!-- Profiles for CI/CD (unit-tests, integration-tests, quality-gates) -->
+    <!-- Profiles for CI/CD Jobs (ADR-008: 3 separate jobs with MAVEN_OPTS=-Xmx512m) -->
     <profiles>
-        <!-- Unit Tests Only -->
+        <!-- CI Job 1: Unit Tests Only (JUnit, Mockito, ArchUnit 12 rules) -->
+        <!-- Usage: mvn clean test -P unit-tests -->
+        <!-- CI Env: MAVEN_OPTS=-Xmx512m mvn clean test -P unit-tests -->
         <profile>
             <id>unit-tests</id>
+            <activation>
+                <property>
+                    <name>ci-job</name>
+                    <value>unit-tests</value>
+                </property>
+            </activation>
             <build>
                 <plugins>
+                    <!-- Run unit tests + ArchUnit rules (all modules) -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>unit-tests</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- Skip integration tests in this job -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-failsafe-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>none</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- Skip quality gates in this job -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-checkstyle-plugin</artifactId>
                         <executions>
                             <execution>
                                 <phase>none</phase>
@@ -230,16 +675,37 @@
             </build>
         </profile>
 
-        <!-- Integration Tests -->
+        <!-- CI Job 2: Integration Tests (Testcontainers, WireMock, Cucumber, @IT tests) -->
+        <!-- Usage: mvn clean verify -P integration-tests -->
+        <!-- CI Env: MAVEN_OPTS=-Xmx512m mvn clean verify -P integration-tests -->
         <profile>
             <id>integration-tests</id>
+            <activation>
+                <property>
+                    <name>ci-job</name>
+                    <value>integration-tests</value>
+                </property>
+            </activation>
             <build>
                 <plugins>
+                    <!-- Skip unit tests in this job (run in job 1) -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>none</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- Run integration tests only -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <executions>
                             <execution>
+                                <id>integration-tests</id>
+                                <phase>integration-test</phase>
                                 <goals>
                                     <goal>integration-test</goal>
                                     <goal>verify</goal>
@@ -247,23 +713,110 @@
                             </execution>
                         </executions>
                     </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <!-- Quality Gates (ArchUnit, Checkstyle) -->
-        <profile>
-            <id>quality-gates</id>
-            <build>
-                <plugins>
+                    <!-- Skip quality gates in this job -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-checkstyle-plugin</artifactId>
                         <executions>
                             <execution>
+                                <phase>none</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- CI Job 3: Quality Gates (Checkstyle, PIT mutations, ArchUnit rules, SonarCloud) -->
+        <!-- Usage: mvn clean verify -P quality-gates -->
+        <!-- CI Env: MAVEN_OPTS=-Xmx512m mvn clean verify -P quality-gates -->
+        <!-- Note: Also runs unit tests to calculate coverage for SonarCloud -->
+        <profile>
+            <id>quality-gates</id>
+            <activation>
+                <property>
+                    <name>ci-job</name>
+                    <value>quality-gates</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <!-- Run unit tests (for coverage) -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>unit-tests-for-quality</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- Skip integration tests in this job -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>none</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- Checkstyle: 20-line max, 4 params, cyclomatic ≤10 -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-checkstyle-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>checkstyle-validate</id>
                                 <phase>validate</phase>
                                 <goals>
                                     <goal>check</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- PIT Mutation Testing (Domain: 85%, Global: 80%) -->
+                    <plugin>
+                        <groupId>org.pitest</groupId>
+                        <artifactId>pitest-maven</artifactId>
+                        <executions>
+                            <execution>
+                                <id>pit-mutations</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>mutationCoverage</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- JaCoCo Coverage Report -->
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>jacoco-report</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>report</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- SonarCloud: 0 bugs, 0 vulns, ≤3% duplication -->
+                    <plugin>
+                        <groupId>org.sonarsource.scanner.maven</groupId>
+                        <artifactId>sonar-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>sonar-analysis</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sonar</goal>
                                 </goals>
                             </execution>
                         </executions>

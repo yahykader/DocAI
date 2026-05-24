@@ -16,34 +16,67 @@
     <description>Output Adapter - External API Integrations (INSEE, BAN, RPPS, etc.)</description>
 
     <dependencies>
-        <!-- Domain & Application Layers -->
+        <!-- === INTERNAL MODULES === -->
         <dependency>
             <groupId>fr.docai</groupId>
             <artifactId>docai-domain</artifactId>
-            <version>0.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>fr.docai</groupId>
             <artifactId>docai-application</artifactId>
-            <version>0.1.0-SNAPSHOT</version>
         </dependency>
 
-        <!-- Spring Web for REST calls -->
+        <!-- === SPRING FRAMEWORK === -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>
 
-        <!-- HTTP Client -->
+        <!-- === HTTP CLIENT === -->
         <dependency>
             <groupId>org.apache.httpcomponents.client5</groupId>
             <artifactId>httpclient5</artifactId>
         </dependency>
 
-        <!-- Test Dependencies -->
+        <!-- === MAPPING === -->
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+        </dependency>
+
+        <!-- === RESILIENCE & RATE LIMITING === -->
+        <dependency>
+            <groupId>io.github.resilience4j</groupId>
+            <artifactId>resilience4j-spring-boot3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.resilience4j</groupId>
+            <artifactId>resilience4j-circuitbreaker</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.resilience4j</groupId>
+            <artifactId>resilience4j-retry</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.vladimir-bukhtoyarov</groupId>
+            <artifactId>bucket4j-core</artifactId>
+        </dependency>
+
+        <!-- === OBSERVABILITY === -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-core</artifactId>
+        </dependency>
+
+        <!-- === TESTING === -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.tomakehurst</groupId>
+            <artifactId>wiremock-jre8</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

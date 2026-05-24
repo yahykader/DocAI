@@ -16,39 +16,62 @@
     <description>Output Adapter - MongoDB Persistence (repositories)</description>
 
     <dependencies>
-        <!-- Domain & Application Layers -->
+        <!-- === INTERNAL MODULES === -->
         <dependency>
             <groupId>fr.docai</groupId>
             <artifactId>docai-domain</artifactId>
-            <version>0.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>fr.docai</groupId>
             <artifactId>docai-application</artifactId>
-            <version>0.1.0-SNAPSHOT</version>
         </dependency>
 
-        <!-- Spring Data MongoDB -->
+        <!-- === SPRING DATA === -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-mongodb</artifactId>
         </dependency>
 
-        <!-- MongoDB Driver (explicit) -->
+        <!-- === MONGODB PERSISTENCE & MIGRATIONS === -->
         <dependency>
             <groupId>org.mongodb</groupId>
             <artifactId>mongodb-driver-sync</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.mongock</groupId>
+            <artifactId>mongock-springboot</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.mongock</groupId>
+            <artifactId>mongodb-springdata-v4-driver</artifactId>
+        </dependency>
 
-        <!-- Test Dependencies -->
+        <!-- === MAPPING === -->
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+        </dependency>
+
+        <!-- === OBSERVABILITY === -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-core</artifactId>
+        </dependency>
+
+        <!-- === TESTING === -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>de.flapdoodle.embed</groupId>
-            <artifactId>de.flapdoodle.embed.mongo.spring30x</artifactId>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>mongodb</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

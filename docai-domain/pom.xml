@@ -51,11 +51,20 @@
 
     <build>
         <plugins>
-            <!-- PIT Mutation Testing: Domain target 85% threshold -->
+            <!-- PIT Mutation Testing: Domain 85% threshold (enforced per ADR-008) -->
             <plugin>
                 <groupId>org.pitest</groupId>
                 <artifactId>pitest-maven</artifactId>
-                <version>1.14.2</version>
+                <configuration>
+                    <mutationThreshold>85</mutationThreshold>
+                    <coverage>90</coverage>
+                    <targetClasses>
+                        <param>fr.docai.domain.*</param>
+                    </targetClasses>
+                    <targetTests>
+                        <param>fr.docai.domain.*</param>
+                    </targetTests>
+                </configuration>
                 <executions>
                     <execution>
                         <id>pit-report</id>
@@ -65,12 +74,6 @@
                         </goals>
                     </execution>
                 </executions>
-                <configuration>
-                    <mutationThreshold>85</mutationThreshold>
-                    <targetClasses>
-                        <param>fr.docai.domain.*</param>
-                    </targetClasses>
-                </configuration>
             </plugin>
         </plugins>
     </build>
