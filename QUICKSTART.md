@@ -46,6 +46,9 @@ cp .env.example .env
 ## 4️⃣ Verify Maven Structure
 
 ```bash
+# Navigate to backend directory
+cd backend
+
 # Validate all POMs
 mvn validate
 
@@ -56,9 +59,16 @@ mvn dependency:tree -pl docai-domain
 mvn help:describe
 ```
 
+**Note**: All Maven commands run from `backend/` directory. Alternatively, use `mvn -f backend/pom.xml` from root.
+
 ---
 
 ## 5️⃣ Run Tests (3 CI Jobs)
+
+```bash
+# All commands run from backend/ directory
+cd backend
+```
 
 ### Job 1: Fast Unit Tests + ArchUnit
 ```bash
@@ -90,6 +100,9 @@ MAVEN_OPTS=-Xmx512m mvn clean verify -P quality-gates
 ## 6️⃣ Build & Run Application
 
 ```bash
+# Navigate to backend directory
+cd backend
+
 # Build all modules
 mvn clean package
 
@@ -101,6 +114,11 @@ mvn spring-boot:run -pl docai-bootstrap
 
 # Access Swagger UI
 curl http://localhost:8080/swagger-ui.html
+```
+
+**From root directory** (alternative):
+```bash
+mvn -f backend/pom.xml spring-boot:run -pl docai-bootstrap
 ```
 
 ---
@@ -120,27 +138,39 @@ Once application is running:
 
 ---
 
-## 8️⃣ Module Structure
+## 8️⃣ Monorepo Structure
+
+**DocAI is organized as a monorepo** with clear separation of concerns:
 
 ```
-docai/ (11 modules)
-├── docai-domain                  ← Pure DDD (ZERO external deps)
-├── docai-application             ← Use cases & services
-├── docai-adapter-in-rest         ← REST controllers (HTTP)
-├── docai-adapter-in-kafka        ← Event consumer
-├── docai-adapter-out-mongodb     ← Persistence (MongoDB)
-├── docai-adapter-out-kafka       ← Event producer
-├── docai-adapter-out-valkey      ← Caching (Redis/Valkey)
-├── docai-adapter-out-ai          ← LLM integration (Claude)
-├── docai-adapter-out-storage     ← Cloud storage (AWS S3)
-├── docai-adapter-out-external    ← External APIs (INSEE, BAN, RPPS)
-└── docai-bootstrap               ← Spring Boot entry point
+DocAI/ (monorepo)
+├── backend/                      (Java/Spring Boot backend)
+│   ├── docai-domain              ← Pure DDD (ZERO external deps)
+│   ├── docai-application         ← Use cases & services
+│   ├── docai-adapter-in-rest     ← REST controllers (HTTP)
+│   ├── docai-adapter-in-kafka    ← Event consumer
+│   ├── docai-adapter-out-mongodb ← Persistence (MongoDB)
+│   ├── docai-adapter-out-kafka   ← Event producer
+│   ├── docai-adapter-out-valkey  ← Caching (Redis/Valkey)
+│   ├── docai-adapter-out-ai      ← LLM integration (Claude)
+│   ├── docai-adapter-out-storage ← Cloud storage (AWS S3)
+│   ├── docai-adapter-out-external← External APIs (INSEE, BAN, RPPS)
+│   ├── docai-bootstrap           ← Spring Boot entry point
+│   └── pom.xml                   ← Parent Maven POM
+│
+├── frontend/                     (Angular frontend - Phase 2)
+│
+├── docker-compose.yml            ← Infrastructure as Code
+└── MONOREPO_STRUCTURE.md         ← Detailed monorepo explanation
 ```
 
+**Backend modules** (11 total):
 Each module has:
 - `pom.xml` (dependencies, plugins)
 - `src/main/java/` (source code)
 - `src/test/java/` (unit & integration tests)
+
+**See `MONOREPO_STRUCTURE.md`** for detailed explanation.
 
 ---
 
@@ -177,6 +207,9 @@ Each module has:
 ### Before Committing
 
 ```bash
+# Navigate to backend
+cd backend
+
 # Run all 3 CI jobs locally
 mvn clean test -P unit-tests                    # Fast (2-3 min)
 MAVEN_OPTS=-Xmx1g mvn clean verify -P quality-gates  # Slow (8-15 min, use 1g for PIT)
@@ -187,6 +220,9 @@ MAVEN_OPTS=-Xmx1g mvn clean verify -P quality-gates  # Slow (8-15 min, use 1g fo
 ## 🔟 Common Commands
 
 ```bash
+# Navigate to backend (all commands below run from here)
+cd backend
+
 # Build specific module
 mvn clean package -pl docai-domain
 
@@ -212,13 +248,20 @@ mvn clean package -DskipTests
 MAVEN_OPTS=-Xmx2g mvn clean verify -P quality-gates
 ```
 
+**From root directory** (alternative):
+```bash
+mvn -f backend/pom.xml clean package -pl docai-domain
+```
+
 ---
 
 ## 📚 Documentation
 
+- **`MONOREPO_STRUCTURE.md`**: Monorepo layout and backend/frontend separation
 - **`CLAUDE.md`**: Project overview, stack, architecture
 - **`CI_JOBS.md`**: 3-job CI/CD details
 - **`MODULES.md`**: All 11 modules explained
+- **`DOCKER_COMPOSE.md`**: Docker infrastructure documentation
 - **`IMPLEMENTATION_SUMMARY.md`**: What was implemented (this session)
 - **`DOCAI_BACKEND_MASTER_SPECKIT_F.md`**: Complete technical spec
 - **`DOCAI_BACKEND_MASTER_SPECKIT_F_V2.md`**: Micro-task breakdown
