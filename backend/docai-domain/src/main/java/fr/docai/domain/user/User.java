@@ -28,7 +28,7 @@ public class User {
         return new User(id, email, tenantId, role, passwordHash, Instant.now());
     }
 
-    static User reconstruct(UserId id, String email, TenantId tenantId, Role role, String passwordHash, Instant createdAt) {
+    public static User reconstruct(UserId id, String email, TenantId tenantId, Role role, String passwordHash, Instant createdAt) {
         return new User(id, email, tenantId, role, passwordHash, createdAt);
     }
 
