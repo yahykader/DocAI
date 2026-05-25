@@ -1,4 +1,4 @@
-package fr.docai.domain.port;
+package fr.docai.domain.port.out;
 
 import java.util.Optional;
 import java.util.List;
