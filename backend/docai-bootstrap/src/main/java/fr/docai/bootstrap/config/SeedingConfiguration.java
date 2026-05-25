@@ -4,6 +4,7 @@ import fr.docai.application.seed.PasswordEncoder;
 import fr.docai.application.seed.SeedingService;
 import fr.docai.domain.port.out.TenantRepositoryPort;
 import fr.docai.domain.port.out.UserRepositoryPort;
+
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

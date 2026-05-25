@@ -1,4 +1,4 @@
-package fr.docai.domain.user;
+package fr.docai.domain.model.user;
 
 public enum Role {
     TENANT_ADMIN("Tenant administrator"),

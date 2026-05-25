@@ -4,6 +4,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
+import fr.docai.domain.model.tenant.Plan;
+import fr.docai.domain.model.tenant.Tenant;
+import fr.docai.domain.model.tenant.TenantId;
+
 class TenantTest {
 
     @Test

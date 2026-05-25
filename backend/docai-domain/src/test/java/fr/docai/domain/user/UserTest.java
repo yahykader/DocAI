@@ -2,8 +2,12 @@ package fr.docai.domain.user;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import fr.docai.domain.tenant.TenantId;
 import org.junit.jupiter.api.Test;
+
+import fr.docai.domain.model.tenant.TenantId;
+import fr.docai.domain.model.user.Role;
+import fr.docai.domain.model.user.User;
+import fr.docai.domain.model.user.UserId;
 
 class UserTest {
 

@@ -4,13 +4,14 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import fr.docai.domain.tenant.Plan;
-import fr.docai.domain.tenant.Tenant;
-import fr.docai.domain.tenant.TenantId;
+import fr.docai.domain.model.tenant.Plan;
+import fr.docai.domain.model.tenant.Tenant;
+import fr.docai.domain.model.tenant.TenantId;
+import fr.docai.domain.model.user.Role;
+import fr.docai.domain.model.user.User;
 import fr.docai.domain.port.out.TenantRepositoryPort;
-import fr.docai.domain.user.Role;
-import fr.docai.domain.user.User;
 import fr.docai.domain.port.out.UserRepositoryPort;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -47,7 +48,7 @@ class SeedingServiceTest {
     @Test
     void shouldCreateAllUsersOnFirstRun() {
         when(tenantRepository.existsById(any())).thenReturn(false);
-        when(userRepository.existsByEmail(any(fr.docai.domain.tenant.TenantId.class), any())).thenReturn(false);
+        when(userRepository.existsByEmail(any(fr.docai.domain.model.tenant.TenantId.class), any())).thenReturn(false);
         when(passwordEncoder.encode(any())).thenReturn("hashedPassword");
 
         seedingService.seedDevData();
@@ -58,7 +59,7 @@ class SeedingServiceTest {
     @Test
     void shouldBeIdempotentWhenTenantsAlreadyExist() {
         when(tenantRepository.existsById(any())).thenReturn(true);
-        when(userRepository.existsByEmail(any(fr.docai.domain.tenant.TenantId.class), any())).thenReturn(true);
+        when(userRepository.existsByEmail(any(fr.docai.domain.model.tenant.TenantId.class), any())).thenReturn(true);
 
         seedingService.seedDevData();
 
@@ -71,7 +72,7 @@ class SeedingServiceTest {
         when(tenantRepository.existsById(TenantId.of("acme-corp"))).thenReturn(true);
         when(tenantRepository.existsById(TenantId.of("beta-assur"))).thenReturn(false);
         when(tenantRepository.existsById(TenantId.of("gamma-rh"))).thenReturn(false);
-        when(userRepository.existsByEmail(any(fr.docai.domain.tenant.TenantId.class), any())).thenReturn(false);
+        when(userRepository.existsByEmail(any(fr.docai.domain.model.tenant.TenantId.class), any())).thenReturn(false);
         when(passwordEncoder.encode(any())).thenReturn("hashedPassword");
 
         seedingService.seedDevData();
@@ -82,7 +83,7 @@ class SeedingServiceTest {
     @Test
     void shouldCreateOnlyNewUsersOnSubsequentRuns() {
         when(tenantRepository.existsById(any())).thenReturn(false);
-        when(userRepository.existsByEmail(any(fr.docai.domain.tenant.TenantId.class), any())).thenReturn(false);
+        when(userRepository.existsByEmail(any(fr.docai.domain.model.tenant.TenantId.class), any())).thenReturn(false);
         when(userRepository.existsByEmail(TenantId.of("acme-corp"), "admin@acme-corp.test")).thenReturn(true);
         when(passwordEncoder.encode(any())).thenReturn("hashedPassword");
 
@@ -94,7 +95,7 @@ class SeedingServiceTest {
     @Test
     void shouldCreateProPlanForAcmeCorp() {
         when(tenantRepository.existsById(any())).thenReturn(false);
-        when(userRepository.existsByEmail(any(fr.docai.domain.tenant.TenantId.class), any())).thenReturn(false);
+        when(userRepository.existsByEmail(any(fr.docai.domain.model.tenant.TenantId.class), any())).thenReturn(false);
         when(passwordEncoder.encode(any())).thenReturn("hashedPassword");
 
         seedingService.seedDevData();
@@ -114,7 +115,7 @@ class SeedingServiceTest {
     @Test
     void shouldCreateStarterPlanForBetaAssurAndGammaRh() {
         when(tenantRepository.existsById(any())).thenReturn(false);
-        when(userRepository.existsByEmail(any(fr.docai.domain.tenant.TenantId.class), any())).thenReturn(false);
+        when(userRepository.existsByEmail(any(fr.docai.domain.model.tenant.TenantId.class), any())).thenReturn(false);
         when(passwordEncoder.encode(any())).thenReturn("hashedPassword");
 
         seedingService.seedDevData();
@@ -133,7 +134,7 @@ class SeedingServiceTest {
     @Test
     void shouldAssignCorrectRolesToUsers() {
         when(tenantRepository.existsById(any())).thenReturn(false);
-        when(userRepository.existsByEmail(any(fr.docai.domain.tenant.TenantId.class), any())).thenReturn(false);
+        when(userRepository.existsByEmail(any(fr.docai.domain.model.tenant.TenantId.class), any())).thenReturn(false);
         when(passwordEncoder.encode(any())).thenReturn("hashedPassword");
 
         seedingService.seedDevData();
@@ -164,7 +165,7 @@ class SeedingServiceTest {
     @Test
     void shouldAssignUsersToCorrectTenants() {
         when(tenantRepository.existsById(any())).thenReturn(false);
-        when(userRepository.existsByEmail(any(fr.docai.domain.tenant.TenantId.class), any())).thenReturn(false);
+        when(userRepository.existsByEmail(any(fr.docai.domain.model.tenant.TenantId.class), any())).thenReturn(false);
         when(passwordEncoder.encode(any())).thenReturn("hashedPassword");
 
         seedingService.seedDevData();

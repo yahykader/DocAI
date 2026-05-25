@@ -1,4 +1,4 @@
-package fr.docai.domain.tenant;
+package fr.docai.domain.model.tenant;
 
 import java.time.Instant;
 import java.util.Objects;

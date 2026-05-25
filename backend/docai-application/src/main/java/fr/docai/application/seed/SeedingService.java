@@ -1,13 +1,14 @@
 package fr.docai.application.seed;
 
-import fr.docai.domain.tenant.Plan;
-import fr.docai.domain.tenant.Tenant;
-import fr.docai.domain.tenant.TenantId;
+import fr.docai.domain.model.tenant.Plan;
+import fr.docai.domain.model.tenant.Tenant;
+import fr.docai.domain.model.tenant.TenantId;
+import fr.docai.domain.model.user.Role;
+import fr.docai.domain.model.user.User;
+import fr.docai.domain.model.user.UserId;
 import fr.docai.domain.port.out.TenantRepositoryPort;
-import fr.docai.domain.user.Role;
-import fr.docai.domain.user.User;
-import fr.docai.domain.user.UserId;
 import fr.docai.domain.port.out.UserRepositoryPort;
+
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;

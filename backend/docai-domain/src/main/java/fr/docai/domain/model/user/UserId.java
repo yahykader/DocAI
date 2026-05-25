@@ -1,4 +1,4 @@
-package fr.docai.domain.user;
+package fr.docai.domain.model.user;
 
 import java.util.Objects;
 import java.util.UUID;

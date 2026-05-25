@@ -1,8 +1,9 @@
-package fr.docai.domain.user;
+package fr.docai.domain.model.user;
 
-import fr.docai.domain.tenant.TenantId;
 import java.time.Instant;
 import java.util.Objects;
+
+import fr.docai.domain.model.tenant.TenantId;
 
 public class User {
     private final UserId id;
