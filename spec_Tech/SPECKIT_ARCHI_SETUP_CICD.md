@@ -821,7 +821,7 @@ DESIGN PATTERNS :
 speckit-implement
 
 Implémente HexagonalArchitectureTest — skill docai-architecture-adr.
-Package : fr.docai.architecture dans docai-domain/test/
+Package : fr.docai.domain dans docai-domain/test/
 
 @AnalyzeClasses(packages = "fr.docai")
 public class HexagonalArchitectureTest {
