@@ -146,30 +146,35 @@ All services run via `docker-compose` locally:
 
 ### Backend Commands
 
+**All Maven commands run from `backend/` directory** (or use `-f backend/pom.xml` from root):
+
 ```bash
+# Navigate to backend directory
+cd backend
+
 # Build entire project
-./mvnw clean package
+mvn clean package
 
 # Build specific module
-./mvnw clean package -pl docai-domain
+mvn clean package -pl docai-domain
 
 # Run tests for domain (highest coverage requirement 90%)
-./mvnw test -pl docai-domain
+mvn test -pl docai-domain
 
 # Run all tests
-./mvnw clean test
+mvn clean test
 
 # Run Checkstyle validation
-./mvnw checkstyle:check
+mvn checkstyle:check
 
-# Run ArchUnit architecture tests
-./mvnw test -pl docai-bootstrap -Dtest=HexagonalArchitectureTest
+# Run ArchUnit architecture tests (12 hexagonal rules)
+mvn test -pl docai-bootstrap -Dtest=HexagonalArchitectureTest
 
 # Run PIT mutation testing (domain only, threshold 85%)
-./mvnw pit:mutationCoverage -pl docai-domain
+MAVEN_OPTS=-Xmx1g mvn pit:mutationCoverage -pl docai-domain
 
 # Start Spring Boot application (after docker compose up)
-./mvnw spring-boot:run -pl docai-bootstrap
+mvn spring-boot:run -pl docai-bootstrap
 
 # Access Swagger API docs
 curl http://localhost:8080/swagger-ui.html
@@ -179,6 +184,12 @@ curl http://localhost:8080/actuator/health
 
 # View logs
 docker compose logs -f <service-name>  # e.g., mongo, kafka, keycloak
+```
+
+**From root directory** (alternative):
+```bash
+mvn -f backend/pom.xml clean package
+mvn -f backend/pom.xml spring-boot:run -pl docai-bootstrap
 ```
 
 ### Frontend Commands
@@ -211,6 +222,85 @@ npm run format
 
 ---
 
+## CI/CD & Testing Strategy
+
+**DocAI uses a 3-tier CI/CD approach** with Maven profiles enforcing quality gates at each level.
+
+### Job 1: Unit Tests + ArchUnit (Fast Feedback)
+
+```bash
+cd backend
+MAVEN_OPTS=-Xmx512m mvn clean test -P unit-tests
+```
+
+**What runs**:
+- JUnit 5 unit tests (`*Test.java`, `*Tests.java`)
+- ArchUnit 12 hexagonal architecture rules
+- Excludes integration tests (`*IT.java`)
+
+**Coverage Requirements**:
+- Global: ≥ 80%
+- Domain: ≥ 90%
+
+**Duration**: ~2-3 minutes
+
+### Job 2: Integration Tests (Real Services)
+
+```bash
+cd backend
+MAVEN_OPTS=-Xmx512m mvn clean verify -P integration-tests
+```
+
+**What runs**:
+- Integration tests (`*IT.java`, `*ITs.java`)
+- Cucumber BDD scenarios
+- TestContainers (MongoDB, Kafka in Docker)
+- WireMock stubs for external APIs
+- Excludes unit tests
+
+**Requirements**:
+- Docker daemon running
+- No external service calls needed (TestContainers provide isolation)
+
+**Duration**: ~5-10 minutes
+
+### Job 3: Quality Gates (Code Standards + Mutations)
+
+```bash
+cd backend
+MAVEN_OPTS=-Xmx1g mvn clean verify -P quality-gates
+```
+
+**What runs**:
+1. Unit tests (for coverage metrics)
+2. Checkstyle (max 20-line methods, 4 params, complexity ≤ 10)
+3. **PIT Mutation Testing**: Domain ≥ 85%, Global ≥ 80%
+4. JaCoCo coverage reports
+5. SonarCloud analysis
+
+**Note**: Use `-Xmx1g` or `-Xmx2g` for PIT mutation testing (memory intensive)
+
+**Duration**: ~8-15 minutes
+
+### Local Development Workflow
+
+Run tests before committing:
+
+```bash
+cd backend
+
+# 1. Fast unit tests (2-3 min)
+MAVEN_OPTS=-Xmx512m mvn clean test -P unit-tests
+
+# 2. Integration tests (5-10 min, if modifying adapters)
+MAVEN_OPTS=-Xmx512m mvn clean verify -P integration-tests
+
+# 3. Full quality gates (8-15 min, before PR)
+MAVEN_OPTS=-Xmx1g mvn clean verify -P quality-gates
+```
+
+---
+
 ## Development Workflow
 
 ### Micro-Task Approach
@@ -238,12 +328,14 @@ Each implementation task is designed for **1 day maximum**. See `DOCAI_BACKEND_M
 
 ### Key Directories
 
-**Backend**:
-- `.` → Root pom.xml (parent)
-- `docai-domain/` → Domain model, entities, value objects, ports
-- `docai-application/` → Use cases, application services, DTOs
-- `docai-adapter-**/` → Adapter implementations (in/out)
-- `docai-bootstrap/` → Spring Boot config, main entry point
+**Backend** (located in `backend/` subdirectory):
+- `backend/pom.xml` → Parent Maven POM (11 modules)
+- `backend/docai-domain/` → Domain model, entities, value objects, ports (90% coverage target)
+- `backend/docai-application/` → Use cases, application services, DTOs
+- `backend/docai-adapter-in-rest/` → REST controller adapters
+- `backend/docai-adapter-in-kafka/` → Kafka consumer adapters
+- `backend/docai-adapter-out-**/` → Outbound adapters (MongoDB, Kafka, Valkey, AI, Storage, External)
+- `backend/docai-bootstrap/` → Spring Boot entry point, ArchUnit tests, configuration
 - `.specify/` → Speckit specifications and templates
 
 **Frontend** (to be created):
@@ -344,11 +436,27 @@ docker compose restart
 
 ### Maven build fails
 ```bash
+cd backend
+
 # Clean and rebuild
-./mvnw clean install -DskipTests
+mvn clean install -DskipTests
 
 # Check dependency conflicts
-./mvnw dependency:tree
+mvn dependency:tree
+
+# From root directory
+mvn -f backend/pom.xml clean install -DskipTests
+```
+
+### OutOfMemoryError during tests
+```bash
+cd backend
+
+# Job 1 or 2: Increase to 1GB
+MAVEN_OPTS=-Xmx1g mvn clean test -P unit-tests
+
+# Job 3 (PIT mutation testing): Use 1-2GB
+MAVEN_OPTS=-Xmx2g mvn clean verify -P quality-gates
 ```
 
 ### Tests fail locally but pass in CI
@@ -385,5 +493,6 @@ See implementation plan in `DOCAI_BACKEND_MASTER_SPECKIT_F_V2.md` for detailed m
 
 ---
 
-**Last Updated**: 2026-05-19  
-**Project Stage**: Architecture & Planning Complete | Ready for Implementation Phase 1
+**Last Updated**: 2026-05-25  
+**Project Stage**: Architecture & Planning Complete | Ready for Implementation Phase 1  
+**Documentation**: Updated with CI/CD jobs, Maven working directory clarity, and testing strategy
