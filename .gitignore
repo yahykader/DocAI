@@ -68,7 +68,6 @@ aws-credentials.json
 # Build / dist
 build/
 dist/
-out/
 *.o
 *.so
 *.dylib
