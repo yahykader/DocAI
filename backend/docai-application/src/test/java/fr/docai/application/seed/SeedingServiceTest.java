@@ -7,10 +7,10 @@ import static org.mockito.Mockito.*;
 import fr.docai.domain.tenant.Plan;
 import fr.docai.domain.tenant.Tenant;
 import fr.docai.domain.tenant.TenantId;
-import fr.docai.domain.tenant.TenantRepositoryPort;
+import fr.docai.domain.port.out.TenantRepositoryPort;
 import fr.docai.domain.user.Role;
 import fr.docai.domain.user.User;
-import fr.docai.domain.user.UserRepositoryPort;
+import fr.docai.domain.port.out.UserRepositoryPort;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -82,8 +82,8 @@ class SeedingServiceTest {
     @Test
     void shouldCreateOnlyNewUsersOnSubsequentRuns() {
         when(tenantRepository.existsById(any())).thenReturn(false);
-        when(userRepository.existsByEmail(TenantId.of("acme-corp"), "admin@acme-corp.test")).thenReturn(true);
         when(userRepository.existsByEmail(any(fr.docai.domain.tenant.TenantId.class), any())).thenReturn(false);
+        when(userRepository.existsByEmail(TenantId.of("acme-corp"), "admin@acme-corp.test")).thenReturn(true);
         when(passwordEncoder.encode(any())).thenReturn("hashedPassword");
 
         seedingService.seedDevData();
@@ -191,7 +191,7 @@ class SeedingServiceTest {
     @Test
     void shouldFailFastWhenTenantSaveFails() {
         when(tenantRepository.existsById(any())).thenReturn(false);
-        when(tenantRepository.save(any())).thenThrow(new RuntimeException("Database error"));
+        doThrow(new RuntimeException("Database error")).when(tenantRepository).save(any());
 
         assertThrows(RuntimeException.class, seedingService::seedDevData);
         verify(userRepository, never()).save(any());
@@ -200,7 +200,7 @@ class SeedingServiceTest {
     @Test
     void shouldFailFastWhenUserSaveFails() {
         setupDefaultMocks();
-        when(userRepository.save(any())).thenThrow(new RuntimeException("Database error"));
+        doThrow(new RuntimeException("Database error")).when(userRepository).save(any());
 
         assertThrows(RuntimeException.class, seedingService::seedDevData);
     }
@@ -289,9 +289,9 @@ class SeedingServiceTest {
     @Test
     void shouldNotCreateDuplicateUsers() {
         when(tenantRepository.existsById(any())).thenReturn(false);
+        when(userRepository.existsByEmail(any(TenantId.class), any())).thenReturn(false);
         when(userRepository.existsByEmail(TenantId.of("acme-corp"), "admin@acme-corp.test"))
             .thenReturn(true);
-        when(userRepository.existsByEmail(any(TenantId.class), any())).thenReturn(false);
         when(passwordEncoder.encode(any())).thenReturn("hashedPassword");
 
         seedingService.seedDevData();

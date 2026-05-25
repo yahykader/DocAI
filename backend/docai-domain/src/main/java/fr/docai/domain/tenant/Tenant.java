@@ -23,7 +23,7 @@ public class Tenant {
         return new Tenant(id, name, plan, Instant.now());
     }
 
-    static Tenant reconstruct(TenantId id, String name, Plan plan, Instant createdAt) {
+    public static Tenant reconstruct(TenantId id, String name, Plan plan, Instant createdAt) {
         return new Tenant(id, name, plan, createdAt);
     }
 

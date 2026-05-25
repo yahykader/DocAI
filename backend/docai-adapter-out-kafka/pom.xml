@@ -37,10 +37,12 @@
             <groupId>org.apache.avro</groupId>
             <artifactId>avro</artifactId>
         </dependency>
+        <!-- TODO: Uncomment when implementing Kafka schema registry integration (Phase 4)
         <dependency>
             <groupId>io.apicurio</groupId>
             <artifactId>apicurio-registry-serde-avro</artifactId>
         </dependency>
+        -->
 
         <!-- === MAPPING === -->
         <dependency>
