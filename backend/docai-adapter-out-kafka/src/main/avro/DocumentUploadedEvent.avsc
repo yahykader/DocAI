@@ -41,12 +41,12 @@
     },
     {
       "name": "uploadedAt",
-      "type": "long",
+      "type": {"type": "long", "logicalType": "timestamp-millis"},
       "doc": "Timestamp when file was uploaded (epoch milliseconds)"
     },
     {
       "name": "occurredAt",
-      "type": "long",
+      "type": {"type": "long", "logicalType": "timestamp-millis"},
       "doc": "Event timestamp (epoch milliseconds)"
     }
   ]

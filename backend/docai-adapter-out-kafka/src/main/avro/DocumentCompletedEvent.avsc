@@ -19,17 +19,14 @@
       "type": {
         "type": "enum",
         "name": "FinalStatus",
-        "symbols": [
-          "SUCCESS",
-          "SUCCESS_WITH_WARNINGS",
-          "MANUAL_REVIEW_REQUIRED"
-        ]
+        "symbols": ["SUCCESS", "SUCCESS_WITH_WARNINGS", "MANUAL_REVIEW_REQUIRED"],
+        "doc": "Final processing status"
       },
       "doc": "Final processing status"
     },
     {
       "name": "occurredAt",
-      "type": "long",
+      "type": {"type": "long", "logicalType": "timestamp-millis"},
       "doc": "Event timestamp (epoch milliseconds)"
     }
   ]

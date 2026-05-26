@@ -24,14 +24,10 @@
       "type": {
         "type": "enum",
         "name": "RiskLevel",
-        "symbols": [
-          "FAIBLE",
-          "MODERE",
-          "ELEVE",
-          "CRITIQUE"
-        ]
+        "symbols": ["FAIBLE", "MODERE", "ELEVE", "CRITIQUE"],
+        "doc": "Risk level classification (FR: FAIBLE=Low, MODERE=Medium, ELEVE=High, CRITIQUE=Critical)"
       },
-      "doc": "Risk level classification (FR: FAIBLE=Low, MODERE=Medium, ELEVE=High, CRITIQUE=Critical)"
+      "doc": "Risk level classification"
     },
     {
       "name": "signals",
@@ -51,11 +47,8 @@
               "type": {
                 "type": "enum",
                 "name": "SignalSeverity",
-                "symbols": [
-                  "INFO",
-                  "WARNING",
-                  "CRITICAL"
-                ]
+                "symbols": ["INFO", "WARNING", "CRITICAL"],
+                "doc": "Severity of the signal"
               },
               "doc": "Severity of the signal"
             },
@@ -67,11 +60,12 @@
           ]
         }
       },
+      "default": [],
       "doc": "Array of fraud signals detected"
     },
     {
       "name": "occurredAt",
-      "type": "long",
+      "type": {"type": "long", "logicalType": "timestamp-millis"},
       "doc": "Event timestamp (epoch milliseconds)"
     }
   ]

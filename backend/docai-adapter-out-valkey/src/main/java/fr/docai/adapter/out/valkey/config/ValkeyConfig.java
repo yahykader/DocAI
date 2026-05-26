@@ -14,12 +14,14 @@ public class ValkeyConfig {
 
     @Bean
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory factory) {
+        var stringSerializer = new StringRedisSerializer();
+        var jsonSerializer = new GenericJackson2JsonRedisSerializer();
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(factory);
-        template.setKeySerializer(new StringRedisSerializer());
-        template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
-        template.setHashKeySerializer(new StringRedisSerializer());
-        template.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());
+        template.setKeySerializer(stringSerializer);
+        template.setValueSerializer(jsonSerializer);
+        template.setHashKeySerializer(stringSerializer);
+        template.setHashValueSerializer(jsonSerializer);
         return template;
     }
 }

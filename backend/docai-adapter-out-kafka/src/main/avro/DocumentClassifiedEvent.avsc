@@ -16,18 +16,7 @@
     },
     {
       "name": "documentType",
-      "type": {
-        "type": "enum",
-        "name": "DocumentType",
-        "symbols": [
-          "INVOICE",
-          "RECEIPT",
-          "IDENTITY",
-          "BANK_STATEMENT",
-          "CONTRACT",
-          "UNKNOWN"
-        ]
-      },
+      "type": "fr.docai.kafka.events.DocumentType",
       "doc": "Classified document type"
     },
     {
@@ -42,7 +31,7 @@
     },
     {
       "name": "occurredAt",
-      "type": "long",
+      "type": {"type": "long", "logicalType": "timestamp-millis"},
       "doc": "Event timestamp (epoch milliseconds)"
     }
   ]
