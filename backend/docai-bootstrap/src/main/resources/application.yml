@@ -114,6 +114,7 @@ resilience4j:
     instances:
       llm:
         failureRateThreshold: 50
+        slidingWindowSize: 10
         minimumNumberOfCalls: 10
         waitDurationInOpenState: 60s
         permittedNumberOfCallsInHalfOpenState: 3
@@ -186,6 +187,7 @@ resilience4j:
         maxAttempts: 3
         waitDuration: 1s
         enableExponentialBackoff: true
+        exponentialBackoffMultiplier: 2
       ocr:
         maxAttempts: 3
         waitDuration: 2s

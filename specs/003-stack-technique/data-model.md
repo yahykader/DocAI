@@ -26,13 +26,13 @@ Ce module est une référence de configuration transversale. Les entités ci-des
 | `docai.doc.classified` | 6 | 7 jours | `documentId` (ADR-002) | `${kafka.groups.classification}` |
 | `docai.doc.extracted` | 6 | 7 jours | `documentId` (ADR-002) | `${kafka.groups.extraction.llm}` |
 | `docai.doc.validated` | 6 | 7 jours | `documentId` (ADR-002) | `${kafka.groups.validation}` |
-| `docai.doc.fraud.detected` | 6 | 7 jours | `documentId` (ADR-002) | `${kafka.groups.fraud.analyser}` |
+| `docai.doc.fraud.analyzed` | 6 | 7 jours | `documentId` (ADR-002) | `${kafka.groups.fraud.analyser}` |
 | `docai.doc.completed` | 3 | 30 jours | `documentId` (ADR-002) | `${kafka.groups.pipeline.orchestrator}` |
 | `docai.doc.failed` | 3 | 30 jours | `tenantId` (exception ADR-002) | N/A (producteur uniquement) |
 | `docai.doc.dlq` | 3 | 90 jours | `tenantId` (exception ADR-002) | N/A (monitoring uniquement) |
 | `docai.outbox.relay` | 3 | 1 jour | `documentId` | `${kafka.groups.outbox.relay}` |
 
-> **Note** : Topic `docai.doc.fraud.detected` remplace `docai.doc.fraud.analyzed` du docker-compose existant — alignement à effectuer lors du Module 3.
+> **Note** : Topic canonique `docai.doc.fraud.analyzed` (Constitution autorité). Tout référence à `fraud.detected` dans les specs antérieures est obsolète — la Constitution prime sur le spec initial (W-001 résolu).
 
 ---
 

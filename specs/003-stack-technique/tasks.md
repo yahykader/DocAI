@@ -36,15 +36,15 @@
 
 - [ ] T002 [US1] Mettre à jour `<apicurio.version>` de `2.4.15.Final` à `2.6.5.Final` dans `backend/pom.xml` (propriété BOM ligne ~64) — résout CHK035
 - [ ] T003 [US1] Ajouter `org.apache.avro:avro-maven-plugin:${avro.version}` en phase `generate-sources` avec `<sourceDirectory>${project.basedir}/src/main/avro/</sourceDirectory>` dans `backend/docai-adapter-out-kafka/pom.xml`
-- [ ] T004 [P] [US1] Créer `backend/docai-adapter-out-kafka/src/main/avro/DocumentUploadedEvent.avsc` — namespace `fr.docai.event`, champs: `documentId` (string), `tenantId` (string), `uploadedAt` (long logicalType=timestamp-millis), `s3Key` (string)
-- [ ] T005 [P] [US1] Créer `backend/docai-adapter-out-kafka/src/main/avro/DocumentClassifiedEvent.avsc` — champs: `documentId`, `tenantId`, `documentType` (string), `confidence` (float), `classifiedAt` (long)
-- [ ] T006 [P] [US1] Créer `backend/docai-adapter-out-kafka/src/main/avro/DocumentExtractedEvent.avsc` — champs: `documentId`, `tenantId`, `extractedFields` (map<string,string>), `extractedAt` (long)
-- [ ] T007 [P] [US1] Créer `backend/docai-adapter-out-kafka/src/main/avro/DocumentValidatedEvent.avsc` — champs: `documentId`, `tenantId`, `validationStatus` (string), `validationResults` (array<string>), `validatedAt` (long)
-- [ ] T008 [P] [US1] Créer `backend/docai-adapter-out-kafka/src/main/avro/DocumentFraudDetectedEvent.avsc` — champs: `documentId`, `tenantId`, `fraudScore` (float), `fraudIndicators` (array<string>), `detectedAt` (long)
-- [ ] T009 [P] [US1] Créer `backend/docai-adapter-out-kafka/src/main/avro/DocumentCompletedEvent.avsc` — champs: `documentId`, `tenantId`, `completedAt` (long), `processingDurationMs` (long)
-- [ ] T010 [P] [US1] Créer `backend/docai-adapter-out-kafka/src/main/avro/DocumentFailedEvent.avsc` — champs: `documentId`, `tenantId`, `failureReason` (string), `failedAt` (long)
-- [ ] T011 [P] [US1] Créer `backend/docai-adapter-out-kafka/src/main/avro/OutboxRelayEvent.avsc` — champs: `aggregateId` (string), `aggregateType` (string), `eventType` (string), `payload` (bytes), `occurredAt` (long)
-- [ ] T012 [US1] Exécuter `cd backend && ./mvnw clean compile -pl docai-adapter-out-kafka` — vérifier que les 8 classes `.java` sont générées sous `docai-adapter-out-kafka/target/generated-sources/avro/fr/docai/event/`
+- [ ] T004 [P] [US1] Créer `backend/docai-adapter-out-kafka/src/main/avro/DocumentUploadedEvent.avsc` — namespace `fr.docai.kafka.events`, champs: `documentId` (string), `tenantId` (string), `uploadedAt` (long logicalType=timestamp-millis), `s3Key` (string)
+- [ ] T005 [P] [US1] Créer `backend/docai-adapter-out-kafka/src/main/avro/DocumentClassifiedEvent.avsc` — namespace `fr.docai.kafka.events`, champs: `documentId`, `tenantId`, `documentType` (string), `confidence` (float), `classifiedAt` (long)
+- [ ] T006 [P] [US1] Créer `backend/docai-adapter-out-kafka/src/main/avro/DocumentExtractedEvent.avsc` — namespace `fr.docai.kafka.events`, champs: `documentId`, `tenantId`, `extractedFields` (map<string,string>), `extractedAt` (long)
+- [ ] T007 [P] [US1] Créer `backend/docai-adapter-out-kafka/src/main/avro/DocumentValidatedEvent.avsc` — namespace `fr.docai.kafka.events`, champs: `documentId`, `tenantId`, `validationStatus` (string), `validationResults` (array<ValidationResult>), `validatedAt` (long)
+- [ ] T008 [P] [US1] Créer `backend/docai-adapter-out-kafka/src/main/avro/DocumentFraudAnalyzedEvent.avsc` — namespace `fr.docai.kafka.events`, champs: `documentId`, `tenantId`, `fraudScore` (int 0-100), `riskLevel` (enum RiskLevel), `signals` (array<FraudSignal>), `occurredAt` (long) — topic: `docai.doc.fraud.analyzed` (Constitution autorité)
+- [ ] T009 [P] [US1] Créer `backend/docai-adapter-out-kafka/src/main/avro/DocumentCompletedEvent.avsc` — namespace `fr.docai.kafka.events`, champs: `documentId`, `tenantId`, `finalStatus` (enum), `occurredAt` (long)
+- [ ] T010 [P] [US1] Créer `backend/docai-adapter-out-kafka/src/main/avro/DocumentFailedEvent.avsc` — namespace `fr.docai.kafka.events`, champs: `documentId`, `tenantId`, `failureStage` (enum), `errorCode` (enum), `occurredAt` (long) — clé partition: `tenantId` (exception ADR-002)
+- [ ] T011 [P] [US1] Créer `backend/docai-adapter-out-kafka/src/main/avro/OutboxRelayEvent.avsc` — namespace `fr.docai.kafka.events`, champs: `outboxId` (string), `aggregateId` (string), `eventType` (string), `payload` (bytes), `occurredAt` (long)
+- [ ] T012 [US1] Exécuter `cd backend && ./mvnw clean compile -pl docai-adapter-out-kafka` — vérifier que les 8 classes `.java` sont générées sous `docai-adapter-out-kafka/target/generated-sources/avro/fr/docai/kafka/events/`
 
 **Checkpoint US1**: `apicurio.version=2.6.5.Final` dans pom.xml + 8 fichiers `.avsc` présents + compile sans erreur.
 
