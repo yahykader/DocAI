@@ -1,0 +1,53 @@
+{
+  "type": "record",
+  "name": "DocumentUploadedEvent",
+  "namespace": "fr.docai.kafka.events",
+  "doc": "Event published when a document is uploaded to S3. ADR-002: documentId is the partition key.",
+  "fields": [
+    {
+      "name": "documentId",
+      "type": "string",
+      "doc": "Unique document identifier (partition key per ADR-002)"
+    },
+    {
+      "name": "tenantId",
+      "type": "string",
+      "doc": "Tenant identifier for multi-tenancy"
+    },
+    {
+      "name": "fileName",
+      "type": "string",
+      "doc": "Original file name (e.g., invoice_2024.pdf)"
+    },
+    {
+      "name": "mimeType",
+      "type": "string",
+      "doc": "MIME type (e.g., application/pdf, image/png)"
+    },
+    {
+      "name": "sizeBytes",
+      "type": "long",
+      "doc": "File size in bytes"
+    },
+    {
+      "name": "s3Key",
+      "type": "string",
+      "doc": "S3 object key (full path including bucket prefix)"
+    },
+    {
+      "name": "contentHash",
+      "type": "string",
+      "doc": "SHA-256 hash of file content for integrity verification"
+    },
+    {
+      "name": "uploadedAt",
+      "type": "long",
+      "doc": "Timestamp when file was uploaded (epoch milliseconds)"
+    },
+    {
+      "name": "occurredAt",
+      "type": "long",
+      "doc": "Event timestamp (epoch milliseconds)"
+    }
+  ]
+}

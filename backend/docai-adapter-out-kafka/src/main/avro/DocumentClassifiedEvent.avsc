@@ -1,0 +1,49 @@
+{
+  "type": "record",
+  "name": "DocumentClassifiedEvent",
+  "namespace": "fr.docai.kafka.events",
+  "doc": "Event published when a document is classified into a document type. ADR-002: documentId is the partition key.",
+  "fields": [
+    {
+      "name": "documentId",
+      "type": "string",
+      "doc": "Unique document identifier (partition key per ADR-002)"
+    },
+    {
+      "name": "tenantId",
+      "type": "string",
+      "doc": "Tenant identifier for multi-tenancy"
+    },
+    {
+      "name": "documentType",
+      "type": {
+        "type": "enum",
+        "name": "DocumentType",
+        "symbols": [
+          "INVOICE",
+          "RECEIPT",
+          "IDENTITY",
+          "BANK_STATEMENT",
+          "CONTRACT",
+          "UNKNOWN"
+        ]
+      },
+      "doc": "Classified document type"
+    },
+    {
+      "name": "confidenceScore",
+      "type": "float",
+      "doc": "Classification confidence score (0.0-1.0)"
+    },
+    {
+      "name": "modelVersion",
+      "type": "string",
+      "doc": "Version of the classification model used"
+    },
+    {
+      "name": "occurredAt",
+      "type": "long",
+      "doc": "Event timestamp (epoch milliseconds)"
+    }
+  ]
+}

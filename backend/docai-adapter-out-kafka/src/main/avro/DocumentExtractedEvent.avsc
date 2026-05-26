@@ -1,0 +1,57 @@
+{
+  "type": "record",
+  "name": "DocumentExtractedEvent",
+  "namespace": "fr.docai.kafka.events",
+  "doc": "Event published when data is extracted from a document. ADR-002: documentId is the partition key. ADR-004: rawOcrText stored in S3.",
+  "fields": [
+    {
+      "name": "documentId",
+      "type": "string",
+      "doc": "Unique document identifier (partition key per ADR-002)"
+    },
+    {
+      "name": "tenantId",
+      "type": "string",
+      "doc": "Tenant identifier for multi-tenancy"
+    },
+    {
+      "name": "documentType",
+      "type": {
+        "type": "enum",
+        "name": "DocumentType",
+        "symbols": [
+          "INVOICE",
+          "RECEIPT",
+          "IDENTITY",
+          "BANK_STATEMENT",
+          "CONTRACT",
+          "UNKNOWN"
+        ]
+      },
+      "doc": "Document type (matched at extraction time)"
+    },
+    {
+      "name": "extractedFields",
+      "type": {
+        "type": "map",
+        "values": "string"
+      },
+      "doc": "Extracted key-value pairs (e.g., invoice_number, total_amount, vendor_name)"
+    },
+    {
+      "name": "globalScore",
+      "type": "float",
+      "doc": "Overall extraction quality score (0.0-1.0)"
+    },
+    {
+      "name": "rawOcrTextS3Key",
+      "type": "string",
+      "doc": "S3 key containing raw OCR text (per ADR-004 for large payloads)"
+    },
+    {
+      "name": "occurredAt",
+      "type": "long",
+      "doc": "Event timestamp (epoch milliseconds)"
+    }
+  ]
+}

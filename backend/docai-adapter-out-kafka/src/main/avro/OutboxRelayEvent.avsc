@@ -1,0 +1,33 @@
+{
+  "type": "record",
+  "name": "OutboxRelayEvent",
+  "namespace": "fr.docai.kafka.events",
+  "doc": "Event for Outbox pattern relay (relays events from MongoDB outbox to Kafka topics). ADR-002: aggregateId is used as partition key.",
+  "fields": [
+    {
+      "name": "outboxId",
+      "type": "string",
+      "doc": "Unique outbox record identifier (MongoDB document ID)"
+    },
+    {
+      "name": "aggregateId",
+      "type": "string",
+      "doc": "Aggregate root ID (typically documentId, used for partition key)"
+    },
+    {
+      "name": "eventType",
+      "type": "string",
+      "doc": "Type of event being relayed (e.g., DocumentUploadedEvent, DocumentClassifiedEvent)"
+    },
+    {
+      "name": "payload",
+      "type": "bytes",
+      "doc": "Serialized event payload (typically JSON or Avro binary)"
+    },
+    {
+      "name": "occurredAt",
+      "type": "long",
+      "doc": "Event timestamp (epoch milliseconds)"
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "type": "record",
+  "name": "DocumentCompletedEvent",
+  "namespace": "fr.docai.kafka.events",
+  "doc": "Event published when a document processing pipeline completes successfully. ADR-002: documentId is the partition key.",
+  "fields": [
+    {
+      "name": "documentId",
+      "type": "string",
+      "doc": "Unique document identifier (partition key per ADR-002)"
+    },
+    {
+      "name": "tenantId",
+      "type": "string",
+      "doc": "Tenant identifier for multi-tenancy"
+    },
+    {
+      "name": "finalStatus",
+      "type": {
+        "type": "enum",
+        "name": "FinalStatus",
+        "symbols": [
+          "SUCCESS",
+          "SUCCESS_WITH_WARNINGS",
+          "MANUAL_REVIEW_REQUIRED"
+        ]
+      },
+      "doc": "Final processing status"
+    },
+    {
+      "name": "occurredAt",
+      "type": "long",
+      "doc": "Event timestamp (epoch milliseconds)"
+    }
+  ]
+}
