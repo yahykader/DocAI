@@ -61,7 +61,7 @@
 
         <!-- Serialization & Schema -->
         <avro.version>1.11.4</avro.version>
-        <apicurio.version>3.0.1</apicurio.version>
+        <apicurio.version>2.6.5.Final</apicurio.version>
         <protobuf.version>3.24.4</protobuf.version>
 
         <!-- Persistence & Migrations -->
@@ -513,7 +513,7 @@
                     <version>${pitest.version}</version>
                     <configuration>
                         <mutationThreshold>85</mutationThreshold>
-                        <coverage>80</coverage>
+                        <coverageThreshold>80</coverageThreshold>
                     </configuration>
                 </plugin>
 

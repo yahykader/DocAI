@@ -13,7 +13,7 @@ spring:
       host: ${VALKEY_HOST:localhost}
       port: ${VALKEY_PORT:6379}
       password: ${VALKEY_PASSWORD:}   # SEC-005: obligatoire en production
-      timeout: 60000ms
+      timeout: 2000ms
       ssl:
         enabled: ${VALKEY_SSL_ENABLED:false}   # SEC-005: true en production
       lettuce:
@@ -47,7 +47,7 @@ spring:
         jwt:
           issuer-uri: ${KEYCLOAK_URL:http://localhost:8180}/realms/docai
           jwk-set-uri: ${KEYCLOAK_URL:http://localhost:8180}/realms/docai/protocol/openid-connect/certs
-          jwks-cache-ttl: 1h   # ADR-006 — défaut Spring = 5min, insuffisant
+          jwk-set-cache-duration: 1h   # ADR-006 — défaut Spring = 5min, insuffisant
 
 # Server Configuration
 server:
@@ -65,21 +65,21 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,prometheus   # port 9091 interne — non exposé publiquement
+        include: health,info,metrics,prometheus
   endpoint:
     health:
       show-details: when_authorized   # SEC-002: protéger les détails internes
       show-components: when_authorized
-  metrics:
-    export:
-      prometheus:
+  prometheus:
+    metrics:
+      export:
         enabled: true
   tracing:
     sampling:
       probability: 1.0
   otlp:
     tracing:
-      endpoint: ${OTLP_ENDPOINT:http://localhost:4317}
+      endpoint: ${OTLP_ENDPOINT:http://localhost:4317}   # SEC: https:// requis hors profil local
 
 # Logging
 logging:
@@ -115,7 +115,7 @@ resilience4j:
       llm:
         failureRateThreshold: 50
         minimumNumberOfCalls: 10
-        waitDurationInOpenState: 30s
+        waitDurationInOpenState: 60s
         permittedNumberOfCallsInHalfOpenState: 3
         automaticTransitionFromOpenToHalfOpenEnabled: true
       ocr:
@@ -126,6 +126,26 @@ resilience4j:
         automaticTransitionFromOpenToHalfOpenEnabled: true
       insee:
         failureRateThreshold: 60
+        minimumNumberOfCalls: 5
+        waitDurationInOpenState: 30s
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+      ban:
+        failureRateThreshold: 60
+        minimumNumberOfCalls: 5
+        waitDurationInOpenState: 30s
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+      rpps:
+        failureRateThreshold: 60
+        minimumNumberOfCalls: 8
+        waitDurationInOpenState: 30s
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+      tika:
+        failureRateThreshold: 50
+        minimumNumberOfCalls: 5
+        waitDurationInOpenState: 30s
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+      opencv:
+        failureRateThreshold: 50
         minimumNumberOfCalls: 5
         waitDurationInOpenState: 30s
         automaticTransitionFromOpenToHalfOpenEnabled: true
@@ -172,6 +192,13 @@ resilience4j:
       insee:
         maxAttempts: 2
         waitDuration: 2s
+      ban:
+        maxAttempts: 2
+        waitDuration: 500ms
+        enableExponentialBackoff: true
+      rpps:
+        maxAttempts: 2
+        waitDuration: 1s
       s3:
         maxAttempts: 3
         waitDuration: 1s
@@ -190,6 +217,15 @@ resilience4j:
       tika:
         maxConcurrentCalls: 5
         maxWaitDuration: 0
+      ban:
+        maxConcurrentCalls: 5
+        maxWaitDuration: 0
+      rpps:
+        maxConcurrentCalls: 5
+        maxWaitDuration: 0
+      opencv:
+        maxConcurrentCalls: 5
+        maxWaitDuration: 0
       s3:
         maxConcurrentCalls: 20
         maxWaitDuration: 0
@@ -200,7 +236,7 @@ docai:
     region: ${AWS_REGION:eu-west-1}
     s3-bucket: ${S3_BUCKET:docai-dev}
   ai:
-    provider: anthropic
+    provider: openai
   stripe:
     api-key: ${STRIPE_API_KEY:dummy-key-for-local-dev}
   keycloak:
@@ -218,7 +254,7 @@ docai:
     rpps:
       ttl: 7d
     classification:
-      ttl: 1h
+      ttl: 30m
     # --- TTLs fixes (ADR-003 exceptions — précision ou calcul dynamique) ---
     idempotency:
       ttl: 24h                   # fixe — précision idempotence
