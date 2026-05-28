@@ -57,6 +57,20 @@ class LogbackJsonConfigTest {
     }
 
     @Test
+    void logbackSpringXmlContainsPiiMaskingPatterns() throws Exception {
+        InputStream stream =
+            getClass().getClassLoader().getResourceAsStream("logback-spring.xml");
+        assertNotNull(stream, "logback-spring.xml must exist before checking PII patterns");
+        String content = new String(stream.readAllBytes(), StandardCharsets.UTF_8);
+        assertTrue(content.contains("MaskingJsonGeneratorDecorator"),
+            "logback-spring.xml must use MaskingJsonGeneratorDecorator for PII masking (FR-OBS-003)");
+        assertTrue(content.contains("[PII_MASKED]"),
+            "logback-spring.xml must define [PII_MASKED] mask for email, IBAN, phone");
+        assertTrue(content.contains("[PARTIAL_MASK]"),
+            "logback-spring.xml must define [PARTIAL_MASK] mask for SIRET");
+    }
+
+    @Test
     void mdcFieldsAttachedToEveryLogEvent() {
         MDC.put("traceId", "trace-test-abc");
         MDC.put("tenantId", "acme-corp");
@@ -75,5 +89,23 @@ class LogbackJsonConfigTest {
             "traceId must be present in every log event MDC (FR-OBS-002)");
         assertTrue(event.getMDCPropertyMap().containsKey("tenantId"),
             "tenantId must be present in every log event MDC (FR-OBS-002)");
+    }
+
+    @Test
+    void debugLevelDisabledInNonLocalProfiles() throws Exception {
+        InputStream stream =
+            getClass().getClassLoader().getResourceAsStream("logback-spring.xml");
+        assertNotNull(stream, "logback-spring.xml must exist");
+        String content = new String(stream.readAllBytes(), StandardCharsets.UTF_8);
+
+        // Extract staging/prod profile section
+        String stagingProdSection = content.substring(
+            content.indexOf("<springProfile name=\"staging,prod\">"),
+            content.indexOf("</springProfile>", content.indexOf("<springProfile name=\"staging,prod\"")));
+
+        assertTrue(stagingProdSection.contains("level=\"INFO\""),
+            "Staging/prod profile must set root level to INFO (FR-OBS-004)");
+        assertTrue(stagingProdSection.contains("<logger name=\"fr.docai\" level=\"INFO\"/>"),
+            "Staging/prod profile must set fr.docai logger to INFO, never DEBUG (FR-OBS-004)");
     }
 }

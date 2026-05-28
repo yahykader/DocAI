@@ -89,6 +89,14 @@ public class V001SetupDocumentsCollection {
         try {
             col.createIndex(keys, options);
             log.info("V001 index created: {} on {}", options.getName(), collName);
+        } catch (com.mongodb.MongoCommandException e) {
+            // Idempotent: index already exists (common in re-applied migrations)
+            if (e.getErrorMessage() != null && e.getErrorMessage().contains("index with key pattern")) {
+                log.debug("V001 index already exists: {} on {} (idempotent)", options.getName(), collName);
+            } else {
+                log.error("V001 failed to create index '{}' on {}: {}", options.getName(), collName, e.getMessage());
+                throw e;
+            }
         } catch (Exception e) {
             log.error("V001 failed to create index '{}' on {}: {}", options.getName(), collName, e.getMessage());
             throw e;
@@ -97,9 +105,13 @@ public class V001SetupDocumentsCollection {
 
     private void dropIfEmpty(MongoDatabase db, String collection) {
         var col = db.getCollection(collection);
-        if (col.countDocuments() == 0) {
+        long docCount = col.countDocuments();
+        if (docCount == 0) {
             col.drop();
             log.info("V001 rollback: dropped empty collection '{}'", collection);
+        } else {
+            log.warn("V001 rollback: skipped drop of non-empty collection '{}' ({} documents present) — SEC-004 guard active",
+                collection, docCount);
         }
     }
 }
