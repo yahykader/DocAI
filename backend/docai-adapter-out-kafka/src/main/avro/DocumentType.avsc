@@ -1,0 +1,7 @@
+{
+  "type": "enum",
+  "name": "DocumentType",
+  "namespace": "fr.docai.kafka.events",
+  "doc": "Document type classification — shared enum referenced by classification and extraction events.",
+  "symbols": ["INVOICE", "RECEIPT", "IDENTITY", "BANK_STATEMENT", "CONTRACT", "UNKNOWN"]
+}

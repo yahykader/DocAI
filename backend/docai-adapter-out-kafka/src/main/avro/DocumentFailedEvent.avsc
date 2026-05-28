@@ -1,0 +1,52 @@
+{
+  "type": "record",
+  "name": "DocumentFailedEvent",
+  "namespace": "fr.docai.kafka.events",
+  "doc": "Event published when document processing fails. ADR-002: tenantId is the partition key (failed/dlq topics route by tenant, not document).",
+  "fields": [
+    {
+      "name": "documentId",
+      "type": "string",
+      "doc": "Unique document identifier"
+    },
+    {
+      "name": "tenantId",
+      "type": "string",
+      "doc": "Tenant identifier for multi-tenancy"
+    },
+    {
+      "name": "failureStage",
+      "type": {
+        "type": "enum",
+        "name": "FailureStage",
+        "symbols": ["UPLOAD", "CLASSIFICATION", "EXTRACTION", "FRAUD_ANALYSIS", "ORCHESTRATION"],
+        "doc": "Processing pipeline stage where the failure occurred"
+      },
+      "doc": "Stage where processing failed"
+    },
+    {
+      "name": "errorCode",
+      "type": {
+        "type": "enum",
+        "name": "ErrorCode",
+        "symbols": [
+          "INVALID_FILE_FORMAT",
+          "FILE_TOO_LARGE",
+          "OCR_FAILED",
+          "LLM_UNAVAILABLE",
+          "NETWORK_TIMEOUT",
+          "SCHEMA_VALIDATION_FAILED",
+          "FRAUD_DETECTION_ERROR",
+          "UNKNOWN_ERROR"
+        ],
+        "doc": "Categorized error code for routing and alerting"
+      },
+      "doc": "Error code for categorization and alerting"
+    },
+    {
+      "name": "occurredAt",
+      "type": {"type": "long", "logicalType": "timestamp-millis"},
+      "doc": "Event timestamp (epoch milliseconds)"
+    }
+  ]
+}

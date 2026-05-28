@@ -1,0 +1,63 @@
+{
+  "type": "record",
+  "name": "DocumentValidatedEvent",
+  "namespace": "fr.docai.kafka.events",
+  "doc": "Event published when document validation is completed (topic: docai.doc.validated). ADR-002: documentId is the partition key.",
+  "fields": [
+    {
+      "name": "documentId",
+      "type": "string",
+      "doc": "Unique document identifier (partition key per ADR-002)"
+    },
+    {
+      "name": "tenantId",
+      "type": "string",
+      "doc": "Tenant identifier for multi-tenancy"
+    },
+    {
+      "name": "validationStatus",
+      "type": {
+        "type": "enum",
+        "name": "ValidationStatus",
+        "symbols": ["VALID", "INVALID", "PARTIAL", "NEEDS_REVIEW"],
+        "doc": "Overall validation result"
+      },
+      "doc": "Overall validation outcome"
+    },
+    {
+      "name": "validationResults",
+      "type": {
+        "type": "array",
+        "items": {
+          "type": "record",
+          "name": "ValidationResult",
+          "fields": [
+            {
+              "name": "checkName",
+              "type": "string",
+              "doc": "Name of the validation check performed (e.g., siret_valid, address_match, rpps_found)"
+            },
+            {
+              "name": "passed",
+              "type": "boolean",
+              "doc": "Whether the check passed"
+            },
+            {
+              "name": "message",
+              "type": ["null", "string"],
+              "default": null,
+              "doc": "Optional detail message (failure reason or registry response)"
+            }
+          ]
+        }
+      },
+      "default": [],
+      "doc": "Individual validation check results from registry lookups (INSEE, BAN, RPPS)"
+    },
+    {
+      "name": "validatedAt",
+      "type": {"type": "long", "logicalType": "timestamp-millis"},
+      "doc": "Event timestamp (epoch milliseconds)"
+    }
+  ]
+}

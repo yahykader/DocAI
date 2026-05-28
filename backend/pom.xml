@@ -51,8 +51,8 @@
         <checkstyle.version>10.13.0</checkstyle.version>
         <sonarcloud.maven.plugin.version>3.10.0.2594</sonarcloud.maven.plugin.version>
 
-        <!-- Resilience & Rate Limiting -->
-        <resilience4j.version>2.3.0</resilience4j.version>
+        <!-- Resilience & Rate Limiting — 2.4.2 (plan.md cible 2.3.0 ; bump requis pour compatibilité Spring Boot 4.0.x + fix CB slidingWindowSize) -->
+        <resilience4j.version>2.4.2</resilience4j.version>
         <bucket4j.version>8.10.1</bucket4j.version>
 
         <!-- Mapping & Data -->
@@ -61,7 +61,7 @@
 
         <!-- Serialization & Schema -->
         <avro.version>1.11.4</avro.version>
-        <apicurio.version>2.4.15.Final</apicurio.version>
+        <apicurio.version>2.6.5.Final</apicurio.version>
         <protobuf.version>3.24.4</protobuf.version>
 
         <!-- Persistence & Migrations -->
@@ -73,6 +73,8 @@
         <pdfbox.version>3.0.3</pdfbox.version>
         <tika.version>2.9.2</tika.version>
         <javacv.version>1.5.11</javacv.version>
+        <!-- JavaCV Platform includes native bindings for all OS (fixes transitive javacpp conflicts) -->
+        <javacpp.version>1.5.11</javacpp.version>
 
         <!-- Cloud & Storage -->
         <aws-sdk.version>2.25.70</aws-sdk.version>
@@ -266,10 +268,17 @@
                 <artifactId>tika-core</artifactId>
                 <version>${tika.version}</version>
             </dependency>
+            <!-- JavaCV Platform: includes native bindings for all OS (fixes V8 version conflicts) -->
             <dependency>
                 <groupId>org.bytedeco</groupId>
                 <artifactId>javacv-platform</artifactId>
                 <version>${javacv.version}</version>
+            </dependency>
+            <!-- Explicitly manage javacpp to prevent transitive conflicts -->
+            <dependency>
+                <groupId>org.bytedeco</groupId>
+                <artifactId>javacpp</artifactId>
+                <version>${javacpp.version}</version>
             </dependency>
 
             <!-- === CLOUD & AWS === -->
@@ -504,7 +513,7 @@
                     <version>${pitest.version}</version>
                     <configuration>
                         <mutationThreshold>85</mutationThreshold>
-                        <coverage>80</coverage>
+                        <coverageThreshold>80</coverageThreshold>
                     </configuration>
                 </plugin>
 

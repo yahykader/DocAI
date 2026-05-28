@@ -2,17 +2,20 @@ spring:
   application:
     name: docai
   profiles:
-    active: local
+    active: ${SPRING_PROFILES_ACTIVE:local}   # SEC-014: externalisé pour CI/CD
 
   # Data Configuration (MongoDB + Redis/Valkey)
   data:
     mongodb:
-      uri: mongodb://admin:password@localhost:27017/docai?authSource=admin&replicaSet=rs0
-      auto-index-creation: true
+      uri: ${MONGODB_URI:mongodb://admin:password@localhost:27017/docai?authSource=admin&replicaSet=rs0}   # SEC-004
+      auto-index-creation: false   # SEC-006: false — index géré par migration (Constitution)
     redis:
-      host: localhost
-      port: 6379
-      timeout: 60000ms
+      host: ${VALKEY_HOST:localhost}
+      port: ${VALKEY_PORT:6379}
+      password: ${VALKEY_PASSWORD:}   # SEC-005: obligatoire en production
+      timeout: 2000ms
+      ssl:
+        enabled: ${VALKEY_SSL_ENABLED:false}   # SEC-005: true en production
       lettuce:
         pool:
           max-active: 8
@@ -21,25 +24,30 @@ spring:
 
   # Kafka Configuration
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     consumer:
-      group-id: docai-group
-      auto-offset-reset: earliest
+      auto-offset-reset: earliest   # group-id supprimé — défini par module via kafka.groups.* (FR-016b)
       max-poll-records: 100
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: io.apicurio.registry.serde.avro.AvroKafkaDeserializer
     producer:
       acks: all
       retries: 3
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: io.apicurio.registry.serde.avro.AvroKafkaSerializer
     properties:
-      schema.registry.url: http://localhost:8081
-      specific.avro.reader: true
+      apicurio.registry.url: ${APICURIO_URL:http://localhost:8081}   # SEC-003: https en production
+      apicurio.registry.auto-register: ${APICURIO_AUTO_REGISTER:false}   # SEC-001: false par défaut
+      apicurio.registry.find-latest: true
 
   # Security: Keycloak
   security:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8180/realms/docai
-          jwk-set-uri: http://localhost:8180/realms/docai/protocol/openid-connect/certs
+          issuer-uri: ${KEYCLOAK_URL:http://localhost:8180}/realms/docai
+          jwk-set-uri: ${KEYCLOAK_URL:http://localhost:8180}/realms/docai/protocol/openid-connect/certs
+          jwk-set-cache-duration: 1h   # ADR-006 — défaut Spring = 5min, insuffisant
 
 # Server Configuration
 server:
@@ -50,22 +58,28 @@ server:
     enabled: true
     min-response-size: 1024
 
-# Management (Actuator, Prometheus, Tracing)
+# Management (Actuator, Prometheus, Tracing) — SEC-002
 management:
+  server:
+    port: ${MANAGEMENT_PORT:9091}   # SEC-002: port interne séparé, non exposé publiquement
   endpoints:
     web:
       exposure:
-        include: health,metrics,prometheus,info
-  metrics:
-    export:
-      prometheus:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when_authorized   # SEC-002: protéger les détails internes
+      show-components: when_authorized
+  prometheus:
+    metrics:
+      export:
         enabled: true
   tracing:
     sampling:
       probability: 1.0
   otlp:
     tracing:
-      endpoint: http://localhost:4317
+      endpoint: ${OTLP_ENDPOINT:http://localhost:4317}   # SEC: https:// requis hors profil local
 
 # Logging
 logging:
@@ -78,16 +92,175 @@ logging:
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
 
+# Consumer Group IDs — DÉFINIS ICI UNIQUEMENT (jamais dans @KafkaListener) — FR-016b
+kafka:
+  groups:
+    upload: docai.upload.processor.group
+    classification: docai.classification.processor.group
+    extraction:
+      llm: docai.extraction.llm.group
+      ocr: docai.extraction.ocr.group
+    validation: docai.validation.processor.group
+    fraud:
+      analyser: docai.fraud.analyser.group
+    pipeline:
+      orchestrator: docai.pipeline.orchestrator.group
+    outbox:
+      relay: docai.outbox.relay.group
+
+# Resilience4j — 8 services (FR-021 à FR-027, Constitution Annex A) — Updated 2026-05-26
+resilience4j:
+  circuitbreaker:
+    instances:
+      llm:
+        failureRateThreshold: 50
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 10
+        waitDurationInOpenState: 60s
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+      ocr:
+        failureRateThreshold: 50
+        minimumNumberOfCalls: 5
+        waitDurationInOpenState: 60s
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+      insee:
+        failureRateThreshold: 60
+        minimumNumberOfCalls: 5
+        waitDurationInOpenState: 30s
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+      ban:
+        failureRateThreshold: 60
+        minimumNumberOfCalls: 5
+        waitDurationInOpenState: 30s
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+      rpps:
+        failureRateThreshold: 60
+        minimumNumberOfCalls: 8
+        waitDurationInOpenState: 30s
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+      tika:
+        failureRateThreshold: 50
+        minimumNumberOfCalls: 5
+        waitDurationInOpenState: 30s
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+      opencv:
+        failureRateThreshold: 50
+        minimumNumberOfCalls: 5
+        waitDurationInOpenState: 30s
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+      s3:
+        failureRateThreshold: 50
+        minimumNumberOfCalls: 10
+        waitDurationInOpenState: 30s
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+  timelimiter:
+    instances:
+      llm:
+        timeoutDuration: 30s
+        cancelRunningFuture: true
+      ocr:
+        timeoutDuration: 60s
+        cancelRunningFuture: true
+      tika:
+        timeoutDuration: 15s   # BR-VIS-003 — JAMAIS modifier, dépend de la capacité système
+        cancelRunningFuture: true
+      opencv:
+        timeoutDuration: 15s   # BR-VIS-003 — JAMAIS modifier, dépend de la capacité système
+        cancelRunningFuture: true
+      insee:
+        timeoutDuration: 5s
+        cancelRunningFuture: true
+      ban:
+        timeoutDuration: 5s
+        cancelRunningFuture: true
+      rpps:
+        timeoutDuration: 5s
+        cancelRunningFuture: true
+      s3:
+        timeoutDuration: 30s
+        cancelRunningFuture: true
+  retry:
+    instances:
+      llm:
+        maxAttempts: 3
+        waitDuration: 1s
+        enableExponentialBackoff: true
+        exponentialBackoffMultiplier: 2
+      ocr:
+        maxAttempts: 3
+        waitDuration: 2s
+      insee:
+        maxAttempts: 2
+        waitDuration: 2s
+      ban:
+        maxAttempts: 2
+        waitDuration: 500ms
+        enableExponentialBackoff: true
+      rpps:
+        maxAttempts: 2
+        waitDuration: 1s
+      s3:
+        maxAttempts: 3
+        waitDuration: 1s
+        enableExponentialBackoff: true
+  bulkhead:
+    instances:
+      llm:
+        maxConcurrentCalls: 20
+        maxWaitDuration: 0
+      ocr:
+        maxConcurrentCalls: 10
+        maxWaitDuration: 0
+      insee:
+        maxConcurrentCalls: 5
+        maxWaitDuration: 0
+      tika:
+        maxConcurrentCalls: 5
+        maxWaitDuration: 0
+      ban:
+        maxConcurrentCalls: 5
+        maxWaitDuration: 0
+      rpps:
+        maxConcurrentCalls: 5
+        maxWaitDuration: 0
+      opencv:
+        maxConcurrentCalls: 5
+        maxWaitDuration: 0
+      s3:
+        maxConcurrentCalls: 20
+        maxWaitDuration: 0
+
 # Application-specific properties
 docai:
   aws:
-    region: eu-west-1
-    s3-bucket: docai-dev
+    region: ${AWS_REGION:eu-west-1}
+    s3-bucket: ${S3_BUCKET:docai-dev}
   ai:
-    provider: anthropic
+    provider: openai
   stripe:
     api-key: ${STRIPE_API_KEY:dummy-key-for-local-dev}
   keycloak:
     realm: docai
     admin-username: admin
     admin-password: ${KEYCLOAK_ADMIN_PASSWORD:admin}
+  cache:
+    # --- TTLs avec jitter ±10% (ADR-003) — appliqué via JitterTtl.withJitter() ---
+    extraction-llm:
+      ttl: 24h
+    insee-siret:
+      ttl: 7d
+    ban-address:
+      ttl: 30d
+    rpps:
+      ttl: 7d
+    classification:
+      ttl: 30m
+    # --- TTLs fixes (ADR-003 exceptions — précision ou calcul dynamique) ---
+    idempotency:
+      ttl: 24h                   # fixe — précision idempotence
+    upload-idempotency:
+      ttl: 24h                   # fixe — précision idempotence
+    # jwt-blacklist: TTL = durée restante du token JWT (calculé à l'exécution)
+    # quota: TTL = secondes jusqu'au 1er du mois suivant (calculé à l'exécution)
