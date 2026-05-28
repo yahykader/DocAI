@@ -52,7 +52,7 @@
         <sonarcloud.maven.plugin.version>3.10.0.2594</sonarcloud.maven.plugin.version>
 
         <!-- Resilience & Rate Limiting — 2.4.2 (plan.md cible 2.3.0 ; bump requis pour compatibilité Spring Boot 4.0.x + fix CB slidingWindowSize) -->
-        <resilience4j.version>2.4.2</resilience4j.version>
+        <resilience4j.version>2.3.0</resilience4j.version>
         <bucket4j.version>8.10.1</bucket4j.version>
 
         <!-- Mapping & Data -->
