@@ -2,13 +2,15 @@ package fr.docai.adapter.out.mongodb.user;
 
 import java.time.Instant;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import fr.docai.domain.model.user.Role;
 
+/**
+ * MongoDB document for the users collection.
+ * Index {tenantId, email} is created exclusively by Mongock V002 (BR-MIG-003).
+ */
 @Document(collection = "users")
-@CompoundIndex(name = "tenant_email_index", def = "{'tenantId': 1, 'email': 1}", unique = true)
 public class UserDocument {
     @Id
     private String id;
@@ -64,10 +66,6 @@ public class UserDocument {
 
     public String getPasswordHash() {
         return passwordHash;
-    }
-
-    public void setPasswordHash(String passwordHash) {
-        this.passwordHash = passwordHash;
     }
 
     public Instant getCreatedAt() {

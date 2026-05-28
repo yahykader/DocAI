@@ -23,6 +23,10 @@
         </dependency>
         <dependency>
             <groupId>fr.docai</groupId>
+            <artifactId>docai-commons</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>fr.docai</groupId>
             <artifactId>docai-application</artifactId>
         </dependency>
 

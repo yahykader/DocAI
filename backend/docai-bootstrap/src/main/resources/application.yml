@@ -49,11 +49,9 @@ spring:
           jwk-set-uri: ${KEYCLOAK_URL:http://localhost:8180}/realms/docai/protocol/openid-connect/certs
           jwk-set-cache-duration: 1h   # ADR-006 — défaut Spring = 5min, insuffisant
 
-# Server Configuration
+# Server Configuration — routes are /v1/* via ApiVersioningConfig (C-04)
 server:
   port: 8080
-  servlet:
-    context-path: /api
   compression:
     enabled: true
     min-response-size: 1024
@@ -81,16 +79,14 @@ management:
     tracing:
       endpoint: ${OTLP_ENDPOINT:http://localhost:4317}   # SEC: https:// requis hors profil local
 
-# Logging
+# Logging — levels only; patterns/encoders configured in logback-spring.xml (T004)
 logging:
   level:
     root: INFO
-    fr.docai: DEBUG
+    fr.docai: INFO   # DEBUG only in local profile via logback-spring.xml springProfile
     org.springframework.web: INFO
     org.springframework.security: INFO
     org.mongodb.driver: INFO
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
 
 # Consumer Group IDs — DÉFINIS ICI UNIQUEMENT (jamais dans @KafkaListener) — FR-016b
 kafka:
@@ -231,6 +227,13 @@ resilience4j:
       s3:
         maxConcurrentCalls: 20
         maxWaitDuration: 0
+
+# Mongock — Migration engine (BR-MIG-007: startup blocked on failure)
+mongock:
+  migration-scan-package:
+    - fr.docai.adapter.out.mongodb.migration
+  enabled: true
+  throw-exception-if-cannot-obtain-lock: true  # BR-MIG-007: never start with failed migration
 
 # Application-specific properties
 docai:

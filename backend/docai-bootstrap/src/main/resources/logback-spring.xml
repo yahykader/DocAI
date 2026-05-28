@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- FR-OBS-003: register PII masking converter for pattern-based appenders -->
+    <conversionRule conversionWord="maskedMessage"
+                    converterClass="fr.docai.bootstrap.logging.PiiMaskingConverter"/>
+
+    <!-- Default (test / dev / any unlisted profile): human-readable, INFO, PII masked -->
+    <springProfile name="!local,!staging,!prod">
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level [%X{traceId}][%X{tenantId}] %logger{36} - %maskedMessage%n</pattern>
+            </encoder>
+        </appender>
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+
+    <!-- Local profile: DEBUG enabled, human-readable with PII masking -->
+    <springProfile name="local">
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level [%X{traceId}][%X{tenantId}] %logger{36} - %maskedMessage%n</pattern>
+            </encoder>
+        </appender>
+        <root level="DEBUG">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+        <logger name="fr.docai" level="DEBUG"/>
+    </springProfile>
+
+    <!-- Staging/Prod: JSON structured logging + PII masking via MaskingJsonGeneratorDecorator -->
+    <springProfile name="staging,prod">
+        <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                <includeMdcKeyName>traceId</includeMdcKeyName>
+                <includeMdcKeyName>tenantId</includeMdcKeyName>
+                <customFields>{"service":"docai"}</customFields>
+                <!-- FR-OBS-003: masks PII in every JSON field value -->
+                <jsonGeneratorDecorator class="net.logstash.logback.mask.MaskingJsonGeneratorDecorator">
+                    <valueMask>
+                        <value>[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}</value>
+                        <mask>[PII_MASKED]</mask>
+                    </valueMask>
+                    <valueMask>
+                        <value>\b\d{14}\b</value>
+                        <mask>[PARTIAL_MASK]</mask>
+                    </valueMask>
+                    <valueMask>
+                        <value>\b[A-Z]{2}\d{2}[A-Z0-9]{10,30}\b</value>
+                        <mask>[PII_MASKED]</mask>
+                    </valueMask>
+                    <valueMask>
+                        <value>\b0[67]\d{8}\b</value>
+                        <mask>[PII_MASKED]</mask>
+                    </valueMask>
+                </jsonGeneratorDecorator>
+            </encoder>
+        </appender>
+        <!-- FR-OBS-004: DEBUG disabled in staging/prod -->
+        <root level="INFO">
+            <appender-ref ref="JSON_CONSOLE"/>
+        </root>
+        <logger name="fr.docai" level="INFO"/>
+        <logger name="org.springframework.web" level="WARN"/>
+        <logger name="org.springframework.security" level="WARN"/>
+        <logger name="org.mongodb.driver" level="WARN"/>
+    </springProfile>
+
+</configuration>

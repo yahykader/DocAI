@@ -494,8 +494,8 @@ See implementation plan in `DOCAI_BACKEND_MASTER_SPECKIT_F_V2.md` for detailed m
 ---
 
 <!-- SPECKIT START -->
-**Active Feature Plan**: `specs/003-stack-technique/plan.md` (Module B — Stack Technique & Intégrations)  
-**Branch**: `004-stack-technique` | **Status**: Plan complete → next `/speckit-tasks`
+**Active Feature Plan**: `specs/005-persistance-standards/plan.md` (Module C — Persistance & Standards)  
+**Branch**: `005-persistance-standards` | **Status**: Plan complete → next `/speckit-tasks`
 <!-- SPECKIT END -->
 
 **Last Updated**: 2026-05-25  
