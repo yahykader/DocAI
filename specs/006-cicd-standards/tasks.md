@@ -20,7 +20,7 @@
 **Purpose**: Verify docker-compose infrastructure health and scaffold new directory structures before implementation begins.
 
 - [ ] T001 Verify docker-compose stack is healthy — run `docker compose ps` and confirm mongodb, kafka, keycloak, prometheus, grafana, tempo are all in state Running or Healthy; resolve any unhealthy service before proceeding
-- [ ] T002 [P] Create `.github/workflows/` directory and `k8s/` directory at repository root (empty scaffolding consumed by downstream phases)
+- [x] T002 [P] Create `.github/workflows/` directory and `k8s/` directory at repository root (empty scaffolding consumed by downstream phases)
 
 **Checkpoint**: Directory structure ready — Phase 2 can begin
 
@@ -32,7 +32,7 @@
 
 **⚠️ CRITICAL**: Phase 3 (CI pipeline) depends on this phase being complete.
 
-- [ ] T003 Add `<module name="ClassLength"><property name="max" value="200"/><property name="countEmpty" value="false"/></module>` inside `<module name="TreeWalker">` in `backend/checkstyle.xml` (plan Étape 1)
+- [x] T003 Add `<module name="ClassLength"><property name="max" value="200"/><property name="countEmpty" value="false"/></module>` inside `<module name="TreeWalker">` in `backend/checkstyle.xml` (plan Étape 1)
 - [ ] T004 Verify Checkstyle: run `cd backend && MAVEN_OPTS=-Xmx512m mvn checkstyle:check -P quality-gates` — expected: BUILD SUCCESS with 0 violations across all modules
 
 **Checkpoint**: Checkstyle configured — Phase 3 (US1) and Phases 4–7 can now begin
@@ -45,7 +45,7 @@
 
 **Independent Test**: Push a commit with an ArchUnit violation to `develop` — Job 1 (`unit-tests`) fails and Jobs 2–5 do not run. Push a valid commit — all 5 jobs pass and PR is eligible for merge.
 
-- [ ] T005 [US1] Create `.github/workflows/01-ci.yml` with the following 5 jobs and their configuration:
+- [x] T005 [US1] Create `.github/workflows/01-ci.yml` with the following 5 jobs and their configuration:
   - `unit-tests`: `MAVEN_OPTS=-Xmx512m`, `mvn clean test -P unit-tests`, runs on every push/PR, `permissions: contents: read`
   - `integration`: `MAVEN_OPTS=-Xmx512m`, `TESTCONTAINERS_REUSE_ENABLE=true`, `mvn clean verify -P integration-tests`, `needs: [unit-tests]`, `permissions: contents: read`
   - `bdd-tests`: `MAVEN_OPTS=-Xmx512m`, `TESTCONTAINERS_REUSE_ENABLE=true`, `mvn clean verify -P integration-tests -Dcucumber.filter.tags=@bdd`, `needs: [unit-tests]`, `permissions: contents: read`
@@ -54,7 +54,7 @@
   - Triggers: `push: branches: [main, develop, 'feature/**']`, `pull_request: branches: [main, develop]`
   - All third-party `uses:` references pinned to full commit SHA (SEC-002)
   - See `contracts/ci-job-matrix.md` for dependency graph reference
-- [ ] T006 [P] [US1] Create `.github/pull_request_template.md` with EXPLAIN PLAN section (ADR-010): checkboxes for `explain()` shows `IXSCAN` not `COLLSCAN`, `tenantId` is first field in compound index, partial index considered if active documents < 20% of collection; plus standard Changes and Test coverage sections
+- [x] T006 [P] [US1] Create `.github/pull_request_template.md` with EXPLAIN PLAN section (ADR-010): checkboxes for `explain()` shows `IXSCAN` not `COLLSCAN`, `tenantId` is first field in compound index, partial index considered if active documents < 20% of collection; plus standard Changes and Test coverage sections
 - [ ] T007 [US1] Validate: push develop branch → observe all 5 CI jobs green in GitHub Actions UI; then push a branch with a deliberate ArchUnit violation in `docai-domain` → confirm `unit-tests` job fails and `integration`/`bdd-tests`/`contract-tests`/`sonarcloud` jobs are skipped; **also run SHA-pin gate** (TASK-SEC-001): `grep -rn "uses:.*@v[0-9]" .github/workflows/ && exit 1; grep -rn "uses:.*@main" .github/workflows/ && exit 1` → must produce no matches (zero mutable action tags permitted)
 
 **Checkpoint**: CI pipeline operational — 5 jobs green on develop, ArchUnit gate confirmed blocking
@@ -67,7 +67,7 @@
 
 **Independent Test**: `docker build -t docai-backend:test ./backend` → size < 300 MB; `docker run --rm docai-backend:test whoami` → prints `docai`. Inject a known CRITICAL CVE → `02-docker.yml` fails before push step.
 
-- [ ] T008 [US2] Create `backend/Dockerfile` with 3 stages:
+- [x] T008 [US2] Create `backend/Dockerfile` with 3 stages:
   - Stage 1 `dependencies` from `eclipse-temurin:21-jdk-alpine`: copy `pom.xml` + module POMs, run `mvn dependency:go-offline -B` (cache layer)
   - Stage 2 `build` from `eclipse-temurin:21-jdk-alpine`: copy source, run `mvn clean package -DskipTests`, run `java -Djarmode=layertools -jar target/docai-bootstrap-*.jar extract --destination /app/extracted`
   - Stage 3 `runtime` from `eclipse-temurin:21-jre-alpine`: copy layered JARs from build stage; `RUN addgroup -S docai && adduser -S -G docai docai`; `USER docai`; `ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+ExitOnOutOfMemoryError"`; `ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar /app/app.jar"]`; `HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 CMD wget --quiet --tries=1 --spider http://localhost:9091/actuator/health || exit 1`

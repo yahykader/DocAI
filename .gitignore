@@ -151,10 +151,9 @@ logs/
 .cache/
 temp/
 
-# Maven wrapper
-.mvn/wrapper/maven-wrapper.properties
-mvnw
-mvnw.cmd
+# Maven wrapper — scripts and properties must be committed for CI/Docker builds
+# Only exclude the binary JAR (downloaded on demand)
+.mvn/wrapper/maven-wrapper.jar
 
 # JVM crash logs
 hs_err_pid*.log
