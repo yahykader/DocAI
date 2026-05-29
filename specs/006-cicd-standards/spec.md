@@ -11,11 +11,11 @@
 
 ### User Story 1 — Automated Quality Gate on Every Push (Priority: P1)
 
-A developer pushes code to a feature branch. The CI pipeline automatically starts, runs three independent jobs in sequence, and provides clear feedback within minutes: unit tests + hexagonal architecture checks, then integration tests against real services, then code quality gates. If any mandatory gate fails, the pipeline stops and the developer is notified before the code can be merged.
+A developer pushes code to a feature branch. The CI pipeline automatically starts, runs five independent jobs and provides clear feedback within minutes: unit tests + hexagonal architecture checks (job 1), integration tests against real services (job 2), BDD tests (job 3), contract tests (job 4), and quality gates (job 5). If any mandatory gate fails, the pipeline stops and the developer is notified before the code can be merged.
 
 **Why this priority**: This is the safety net for the entire project. Without it, code quality standards cannot be enforced consistently and every other module depends on this feedback loop being in place.
 
-**Independent Test**: Can be fully tested by pushing a commit to any branch and observing that three CI jobs run in order, each producing a pass/fail result that gates the next step.
+**Independent Test**: Can be fully tested by pushing a commit to any branch and observing that five CI jobs run in order — jobs 2, 3, and 4 depending on job 1; job 5 depending on jobs 2 and 3 — each producing a pass/fail result that gates the next step.
 
 **Acceptance Scenarios**:
 
@@ -23,7 +23,7 @@ A developer pushes code to a feature branch. The CI pipeline automatically start
 2. **Given** a developer pushes code where `docai-domain` test coverage drops below 90%, **When** Job 3 (quality gates) runs, **Then** the pull request is blocked from merging.
 3. **Given** a developer pushes code with global coverage below 80%, **When** Job 3 runs, **Then** the pull request is blocked with a clear coverage report.
 4. **Given** SonarCloud detects one or more new bugs in the changed code, **When** Job 3 completes, **Then** the merge is blocked and the developer sees which lines introduced bugs.
-5. **Given** a developer pushes valid code passing all gates, **When** all three jobs complete, **Then** the pull request is green and eligible for merge.
+5. **Given** a developer pushes valid code passing all gates, **When** all five jobs complete, **Then** the pull request is green and eligible for merge.
 
 ---
 
@@ -109,12 +109,12 @@ An operations engineer investigating a slow document processing job can search l
 
 #### CI Pipeline (GitHub Actions)
 
-- **FR-001**: The CI system MUST run three separate jobs: (1) unit tests + architecture checks, (2) integration tests, (3) quality gates and code analysis.
+- **FR-001**: The CI system MUST run five separate jobs: (1) `unit-tests` — unit tests + ArchUnit hexagonal architecture checks; (2) `integration` — integration tests with TestContainers against real services; (3) `bdd-tests` — BDD/Cucumber scenarios with TestContainers; (4) `contract-tests` — Spring Cloud Contract verification; (5) `sonarcloud` — quality gates, mutation testing, and code analysis. Jobs 2, 3, and 4 each depend on job 1; job 5 depends on jobs 2 and 3 (ADR-008).
 - **FR-002**: Each CI job MUST be individually cancellable and independently reportable to the pull request status.
 - **FR-003**: Job 1 MUST fail immediately on any hexagonal architecture rule violation, without running remaining test suites.
-- **FR-004**: Job 2 MUST activate container reuse to reduce startup overhead on the CI runner.
-- **FR-005**: All jobs run on **`ubuntu-latest` GitHub-hosted runners** (7 GB RAM). JVM heap MUST be capped via `MAVEN_OPTS`: `-Xmx512m` for jobs 1 and 2, `-Xmx1g` for job 3 (mutation testing). Container reuse (`TESTCONTAINERS_REUSE_ENABLE=true`) MUST be enabled on job 2 to stay within memory bounds (ADR-008).
-- **FR-006**: Job 3 MUST run Checkstyle validation; any violation of the method length, parameter count, or cyclomatic complexity limits MUST fail the build.
+- **FR-004**: Jobs 2 (`integration`) and 3 (`bdd-tests`) MUST activate container reuse (`TESTCONTAINERS_REUSE_ENABLE=true`) to reduce startup overhead on the CI runner (ADR-008).
+- **FR-005**: All jobs run on **`ubuntu-latest` GitHub-hosted runners** (7 GB RAM). JVM heap MUST be capped via `MAVEN_OPTS`: `-Xmx512m` for jobs 1, 2, 3, and 4; `-Xmx1g` for job 5 (`sonarcloud`, which runs mutation testing). Container reuse (`TESTCONTAINERS_REUSE_ENABLE=true`) MUST be enabled on jobs 2 and 3 to stay within memory bounds (ADR-008).
+- **FR-006**: Job 5 (`sonarcloud`) MUST run Checkstyle validation; any violation of the method length, parameter count, cyclomatic complexity, or class length limits MUST fail the build.
 - **FR-007**: The `docai-domain` module MUST achieve at least 90% test coverage; any PR dropping below this threshold MUST be blocked.
 - **FR-008**: Global project test coverage MUST remain at or above 80%; PRs violating this MUST be blocked.
 - **FR-009**: The code analysis tool MUST block merges when it detects at least one new bug in the changed code.
@@ -129,7 +129,7 @@ An operations engineer investigating a slow document processing job can search l
 
 - **FR-013**: The Docker build MUST use a multi-stage process: a build stage producing the application artifact, and a runtime stage using JRE 21 on Alpine Linux.
 - **FR-014**: The runtime container MUST run the application process as the non-root user `docai`.
-- **FR-015**: The image MUST be scanned for vulnerabilities before publication; images with at least one CRITICAL-severity vulnerability MUST NOT be published.
+- **FR-015**: The image MUST be scanned for vulnerabilities before publication; images with at least one CRITICAL-severity vulnerability MUST NOT be published (`exit-code: 1` on CRITICAL). HIGH-severity findings MUST be reported in the workflow summary but do NOT block publication. Severities below HIGH are informational only.
 - **FR-015b**: The published image MUST be pushed to **GitHub Container Registry (ghcr.io)** using the workflow's `GITHUB_TOKEN`; no additional registry credentials are required.
 
 #### Kubernetes Manifests
@@ -142,7 +142,16 @@ An operations engineer investigating a slow document processing job can search l
 
 #### Feature Flags
 
-- **FR-019**: The system MUST define and configure exactly 6 feature flags in the **self-hosted Unleash** instance (service `unleash` in `docker-compose.yml`, image `unleashorg/unleash-server`, backed by a dedicated PostgreSQL container).
+- **FR-019**: The system MUST define and configure exactly 6 feature flags in the **self-hosted Unleash** instance (service `unleash` in `docker-compose.yml`, image `unleashorg/unleash-server`, backed by a dedicated PostgreSQL container). All 6 flags MUST default to `false` in all environments (local, staging, production) at initial configuration:
+
+  | Flag name | Default | Purpose |
+  |-----------|---------|---------|
+  | `billing.enabled` | `false` | Billing module activation |
+  | `fraud.v2.enabled` | `false` | Fraud detection v2 algorithm |
+  | `extraction.mistral.enabled` | `false` | Mistral LLM extraction provider |
+  | `dashboard.search.enabled` | `false` | Dashboard full-text search |
+  | `notifications.inapp.enabled` | `false` | In-app notification system |
+  | `maintenance.mode` | `false` | Maintenance mode (disables processing) |
 - **FR-019b**: The `docker-compose.yml` MUST include the `unleash` service and its PostgreSQL dependency so that `docker compose up -d` starts a fully functional Unleash instance at `http://localhost:4242`.
 - **FR-020**: Each feature flag MUST support per-tenant targeting so the same flag can be active for one tenant and inactive for another simultaneously.
 - **FR-021**: Feature flag state changes MUST take effect at runtime without requiring an application restart or redeployment.
@@ -159,7 +168,7 @@ An operations engineer investigating a slow document processing job can search l
 
 ### Key Entities
 
-- **CI Pipeline**: A sequence of three ordered jobs (unit-arch, integration, quality) triggered on push and pull request events; each job has a pass/fail status reported to the branch protection rules.
+- **CI Pipeline**: A sequence of five ordered jobs (`unit-tests`, `integration`, `bdd-tests`, `contract-tests`, `sonarcloud`) triggered on push and pull request events; each job has a pass/fail status reported to the branch protection rules.
 - **Docker Image**: An immutable, versioned artifact produced from the source code; tagged with commit SHA; associated with a Trivy security scan result.
 - **Kubernetes Manifest Set**: Three files (Deployment, Service, HPA) that together define how the application runs, is reachable, and scales in a cluster.
 - **Feature Flag**: A named toggle stored in the feature flag service, supporting global and per-tenant states; consumed at runtime by the application without restart.
@@ -172,7 +181,7 @@ An operations engineer investigating a slow document processing job can search l
 
 ### Measurable Outcomes
 
-- **SC-001**: A developer receives pass/fail feedback from all three CI stages within 15 minutes of pushing a commit.
+- **SC-001**: A developer receives pass/fail feedback from all five CI jobs within 15 minutes of pushing a commit.
 - **SC-002**: Any ArchUnit architecture violation causes the pipeline to stop within the first CI job, before integration tests run.
 - **SC-003**: A pull request that reduces `docai-domain` coverage below 90% or global coverage below 80% is automatically blocked from merging without manual intervention.
 - **SC-004**: Zero Docker images containing a CRITICAL vulnerability are reachable in the container registry.
@@ -208,4 +217,4 @@ An operations engineer investigating a slow document processing job can search l
 - The distributed tracing system and metrics collection infrastructure are part of the shared Docker Compose stack (Grafana Tempo, Prometheus); the application only adds the integration layer.
 - ADR-008 is in force: memory limits (512 MB for jobs 1–2, 1 GB for job 3) and container reuse for integration tests are non-negotiable CI constraints.
 - ADR-010 is in force: slow query logging is activated only in the development profile; it is not enabled in staging or production.
-- The 6 feature flags correspond to capabilities planned in subsequent modules (Module 1 through Module 4); their exact names and default states will be confirmed during planning.
+- The 6 feature flags (`billing.enabled`, `fraud.v2.enabled`, `extraction.mistral.enabled`, `dashboard.search.enabled`, `notifications.inapp.enabled`, `maintenance.mode`) all default to `false` in every environment. Individual flags are enabled per environment via the Unleash dashboard; no flag is enabled by default at application startup.

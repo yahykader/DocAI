@@ -40,7 +40,7 @@
 
 - [ ] CHK013 - Is the `MAVEN_OPTS` specification complete and authoritative? FR-005 specifies `-Xmx512m` and `-Xmx1g` (job 3), but implementation intent adds `-Xms256m`. Is the minimum heap setting a requirement or a suggested default? [Clarity, Spec §FR-005]
 
-- [ ] CHK014 - Is the Trivy vulnerability severity gate consistent across all spec references? FR-015 specifies CRITICAL only, but implementation intent includes HIGH. Does the spec require blocking on HIGH-severity CVEs? [Clarity, Conflict, Spec §FR-015]
+- [x] CHK014 - Is the Trivy vulnerability severity gate consistent across all spec references? FR-015 specifies CRITICAL only, but implementation intent includes HIGH. Does the spec require blocking on HIGH-severity CVEs? [Clarity, Conflict, Spec §FR-015] → **RESOLVED 2026-05-29**: CRITICAL blocks publication (`exit-code: 1`); HIGH is reported in workflow summary but does NOT block. FR-015 updated to make this explicit.
 
 - [ ] CHK015 - Is the "manual approval" requirement for production deployment sufficiently specific — does it define the number of required reviewers, who qualifies, and whether the GitHub Environment name `production` is a hard requirement? [Clarity, Spec §FR-015c]
 
@@ -50,9 +50,9 @@
 
 ## Requirement Consistency
 
-- [ ] CHK017 - Is the `notifications.inapp.enabled` default value consistent across all authoritative documents? Plan Étape 6 flags table shows `false`; implementation intent specifies `true` for DEV. Which value is the authoritative requirement? [Conflict, Spec §FR-019]
+- [x] CHK017 - Is the `notifications.inapp.enabled` default value consistent across all authoritative documents? Plan Étape 6 flags table shows `false`; implementation intent specifies `true` for DEV. Which value is the authoritative requirement? [Conflict, Spec §FR-019] → **RESOLVED 2026-05-29**: `false` in all environments. Confirmed by plan.md Étape 6 + data-model.md Feature Flag Registry (both authoritative). FR-019 updated with full flag table, all defaults `false`. Assumptions updated.
 
-- [ ] CHK018 - Is the "three separate jobs" wording in FR-001 consistent with the five-job implementation plan? The ADR-008 deviation is justified in plan Complexity Tracking but FR-001 still reads "three separate jobs (1) … (2) … (3) …". [Inconsistency, Spec §FR-001]
+- [x] CHK018 - Is the "three separate jobs" wording in FR-001 consistent with the five-job implementation plan? The ADR-008 deviation is justified in plan Complexity Tracking but FR-001 still reads "three separate jobs (1) … (2) … (3) …". [Inconsistency, Spec §FR-001] → **RESOLVED 2026-05-29**: FR-001 updated to "five separate jobs" with explicit names (unit-tests, integration, bdd-tests, contract-tests, sonarcloud) and dependency graph. FR-004, FR-005, FR-006, SC-001, US1, Key Entities all updated consistently.
 
 - [ ] CHK019 - Are workflow trigger conditions (branches, event types, tag patterns) consistently defined for all four workflow files (01-ci, 02-docker, 03-staging, 04-production)? User Story 2 mentions `main` merge but the complete trigger matrix is absent from spec requirements. [Completeness, Consistency]
 
