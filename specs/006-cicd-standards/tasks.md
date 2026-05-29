@@ -55,7 +55,7 @@
   - All third-party `uses:` references pinned to full commit SHA (SEC-002)
   - See `contracts/ci-job-matrix.md` for dependency graph reference
 - [ ] T006 [P] [US1] Create `.github/pull_request_template.md` with EXPLAIN PLAN section (ADR-010): checkboxes for `explain()` shows `IXSCAN` not `COLLSCAN`, `tenantId` is first field in compound index, partial index considered if active documents < 20% of collection; plus standard Changes and Test coverage sections
-- [ ] T007 [US1] Validate: push develop branch → observe all 5 CI jobs green in GitHub Actions UI; then push a branch with a deliberate ArchUnit violation in `docai-domain` → confirm `unit-tests` job fails and `integration`/`bdd-tests`/`contract-tests`/`sonarcloud` jobs are skipped
+- [ ] T007 [US1] Validate: push develop branch → observe all 5 CI jobs green in GitHub Actions UI; then push a branch with a deliberate ArchUnit violation in `docai-domain` → confirm `unit-tests` job fails and `integration`/`bdd-tests`/`contract-tests`/`sonarcloud` jobs are skipped; **also run SHA-pin gate** (TASK-SEC-001): `grep -rn "uses:.*@v[0-9]" .github/workflows/ && exit 1; grep -rn "uses:.*@main" .github/workflows/ && exit 1` → must produce no matches (zero mutable action tags permitted)
 
 **Checkpoint**: CI pipeline operational — 5 jobs green on develop, ArchUnit gate confirmed blocking
 
@@ -96,6 +96,7 @@
 - [ ] T014 [US3] Create `.github/workflows/03-deploy-staging.yml`: trigger `workflow_run` on `02-docker.yml` completed successfully on branch `develop`; `permissions: contents: read, id-token: write`; steps: `kubectl set image deployment/docai-backend docai-backend=ghcr.io/${{ github.repository_owner }}/docai-backend:${{ github.event.workflow_run.head_sha }}`; `kubectl rollout status deployment/docai-backend --timeout=120s`; post-deploy health check `curl -f https://staging.docai.fr/actuator/health`; all third-party actions SHA-pinned (SEC-002)
 - [ ] T015 [US3] Create `.github/workflows/04-deploy-production.yml`: trigger `workflow_dispatch` with input `image_tag`; `environment: production` (GitHub Environment protection — blocks execution until required reviewer approves); `permissions: contents: read, id-token: write`; same kubectl set-image + rollout status + health check steps as staging; all actions SHA-pinned (SEC-002)
 - [ ] T016 [US3] Validate: run `kubectl apply --dry-run=client -f k8s/` → confirm output shows "deployment.apps/docai-backend configured", "service/docai-backend configured", "horizontalpodautoscaler.autoscaling/docai-backend configured" with 0 errors; confirm `ls k8s/` contains no file named `*secret*` or `*Secret*`
+- [ ] T016b [P] [US3] Document kubectl authentication mechanism in `docs/k8s-auth.md` (TASK-SEC-002): specify OIDC federation method in use (IRSA, GKE Workload Identity, or stored kubeconfig); list required GitHub secrets by name (e.g. `KUBE_CONFIG_STAGING`, `AWS_ROLE_ARN`); document minimum RBAC permissions for the CI service account — `patch` on `apps/deployments` + `get`/`watch` for rollout status in namespace `docai-staging`; include negative verification command: `kubectl auth can-i delete namespaces --as=<ci-service-account>` MUST return `no`
 
 **Checkpoint**: K8s manifests validated dry-run clean, securityContext present, no Secret YAML, staging/production workflows created
 
@@ -107,11 +108,11 @@
 
 **Independent Test**: `docker compose up -d unleash unleash-db` → `curl http://localhost:4242/api/client/features` shows 6 flags all `false`; stop `unleash` container → application returns `false` for all `isEnabled()` calls with no thrown exception (unit test T023 verifies this).
 
-- [ ] T017 [US4] Add two services to `docker-compose.yml`: `unleash-db` (`image: postgres:16-alpine`, env POSTGRES_DB/USER/PASSWORD all set to `unleash`, named volume `unleash-db-data`); `unleash` (`image: unleashorg/unleash-server:latest`, port 4242, `depends_on: unleash-db`, env DATABASE_URL pointing to unleash-db)
+- [ ] T017 [US4] Add two services to `docker-compose.yml`: `unleash-db` (`image: postgres:16-alpine`, env POSTGRES_DB/USER/PASSWORD all set to `unleash` — **add inline comment `# LOCAL PROFILE ONLY — staging/prod uses AWS Secrets Manager (SEC-004)`**; named volume `unleash-db-data`); `unleash` (`image: unleashorg/unleash-server:latest`, port 4242, `depends_on: unleash-db`, env DATABASE_URL pointing to unleash-db)
 - [ ] T018 [P] [US4] Create `backend/docai-domain/src/main/java/fr/docai/domain/port/out/FeatureFlagPort.java`: interface with `boolean isEnabled(String flagName)` and `boolean isEnabled(String flagName, String tenantId)`; zero Spring/Unleash imports; Javadoc: "Implementations MUST be fail-safe: any exception returns false (flag disabled)" — reference file: `specs/006-cicd-standards/contracts/FeatureFlagPort.java`
 - [ ] T019 [P] [US4] Add `<dependency><groupId>io.getunleash</groupId><artifactId>unleash-client-java</artifactId></dependency>` to `backend/docai-bootstrap/pom.xml` (use latest stable version from Maven Central)
 - [ ] T020 [US4] Create `backend/docai-bootstrap/src/main/java/fr/docai/bootstrap/config/UnleashConfig.java`: `@Configuration` class; `@Bean` method returning `DefaultUnleash` initialized with `UnleashConfig.newConfig().appName("${docai.unleash.app-name}").instanceId("docai-backend").unleashAPI("${docai.unleash.url}/api").apiKey("${docai.unleash.api-token}").build()`
-- [ ] T021 [US4] Create `backend/docai-bootstrap/src/main/java/fr/docai/bootstrap/feature/UnleashFeatureFlagAdapter.java`: `@Component` implementing `FeatureFlagPort`; constructor injection of `DefaultUnleash unleash`; `isEnabled(flagName)` → `try { return unleash.isEnabled(flagName); } catch (Exception e) { log.warn("Unleash unavailable for flag {}", flagName); return false; }`; `isEnabled(flagName, tenantId)` → same pattern using `UnleashContext.builder().userId(tenantId).build()`; never rethrows
+- [ ] T021 [US4] **Write unit test FIRST (TDD — Constitution III, TASK-SEC-003)**: create `backend/docai-bootstrap/src/test/java/fr/docai/bootstrap/feature/UnleashFeatureFlagAdapterTest.java`; mock `DefaultUnleash` to throw `RuntimeException` on both `isEnabled()` overloads; assert `adapter.isEnabled("billing.enabled")` returns `false` and no exception propagates; assert `adapter.isEnabled("billing.enabled", "tenant-acme")` returns `false` and no exception propagates; test class annotated with `@ExtendWith(MockitoExtension.class)`; **confirm test is RED before proceeding to T022**
 - [ ] T022 [P] [US4] Add to `backend/docai-bootstrap/src/main/resources/application.yml`:
   ```yaml
   docai:
@@ -121,8 +122,8 @@
       app-name: docai-backend
   ```
   Add inline comment: "UNLEASH_API_TOKEN default is local profile only. Staging/prod: scoped token in AWS Secrets Manager, mounted via CSI Driver."
-- [ ] T023 [US4] Write unit test `backend/docai-bootstrap/src/test/java/fr/docai/bootstrap/feature/UnleashFeatureFlagAdapterTest.java`: mock `DefaultUnleash` to throw `RuntimeException` on both `isEnabled()` overloads; assert `adapter.isEnabled("billing.enabled")` returns `false` and no exception propagates; assert `adapter.isEnabled("billing.enabled", "tenant-acme")` returns `false` and no exception propagates; test class annotated with `@ExtendWith(MockitoExtension.class)`
-- [ ] T024 [US4] Validate feature flags: run `docker compose up -d unleash unleash-db`, wait 15 s for init, then `curl http://localhost:4242/api/client/features -H "Authorization: *:*.unleash-insecure-api-token"` → HTTP 200; confirm `billing.enabled` flag exists with `enabled: false`; confirm all 6 flags present: `billing.enabled`, `fraud.v2.enabled`, `extraction.mistral.enabled`, `dashboard.search.enabled`, `notifications.inapp.enabled`, `maintenance.mode`
+- [ ] T023 [US4] **Implement fail-safe adapter to make T021 GREEN**: create `backend/docai-bootstrap/src/main/java/fr/docai/bootstrap/feature/UnleashFeatureFlagAdapter.java`; `@Component` implementing `FeatureFlagPort`; constructor injection of `DefaultUnleash unleash`; `isEnabled(flagName)` → `try { return unleash.isEnabled(flagName); } catch (Exception e) { log.warn("Unleash unavailable for flag {}", flagName); return false; }`; `isEnabled(flagName, tenantId)` → same pattern using `UnleashContext.builder().userId(tenantId).build()`; never rethrows; **run T021 test suite — must be GREEN before continuing**
+- [ ] T024 [US4] Validate feature flags: run `docker compose up -d unleash unleash-db`, wait 15 s for init, then `curl http://localhost:4242/api/client/features -H "Authorization: *:*.unleash-insecure-api-token"` (token is local profile only per SEC-004 — replace with AWS Secrets Manager value in staging/prod) → HTTP 200; confirm `billing.enabled` flag exists with `enabled: false`; confirm all 6 flags present: `billing.enabled`, `fraud.v2.enabled`, `extraction.mistral.enabled`, `dashboard.search.enabled`, `notifications.inapp.enabled`, `maintenance.mode`
 
 **Checkpoint**: 6 flags configured (all `false`), `FeatureFlagPort` wired, fail-safe unit test passing, `billing.enabled=false` confirmed in DEV
 
@@ -247,13 +248,13 @@ After Phase 2 completes:
 
 ---
 
-## Open Conflicts (resolve before implementing affected tasks)
+## Conflicts (resolved 2026-05-29)
 
-| ID | Conflict | Affected Tasks | Resolution Required |
-|----|---------|---------------|-------------------|
-| CHK017 | `notifications.inapp.enabled`: plan.md Étape 6 = `false`; checklist input = `true` in DEV | T024 | Confirm authoritative default: plan.md says `false`; data-model.md confirms `false`. Update checklist input if plan is correct. |
-| CHK018 | FR-001 says "three separate jobs"; plan uses 5 | T005 | Update FR-001 in spec.md to "five separate jobs" to match the ADR-008 deviation documented in plan.md Complexity Tracking. |
-| CHK014 | FR-015 specifies CRITICAL only; checklist input says CRITICAL,HIGH | T009 | Confirm Trivy severity gate: T009 implements FR-015 (CRITICAL only). If HIGH should also block, update FR-015 before implementing T009. |
+| ID | Conflict | Affected Tasks | Resolution |
+|----|---------|---------------|-----------|
+| CHK017 | `notifications.inapp.enabled`: plan.md Étape 6 = `false`; checklist input = `true` in DEV | T024 | **RESOLVED**: `false` in all environments. plan.md Étape 6 + data-model.md Feature Flag Registry are authoritative. spec.md FR-019 updated with full flag table, all defaults `false`. |
+| CHK018 | FR-001 said "three separate jobs"; plan uses 5 | T005 | **RESOLVED**: spec.md FR-001 updated to "five separate jobs" (unit-tests, integration, bdd-tests, contract-tests, sonarcloud) with full dependency graph. FR-004, FR-005, FR-006, SC-001, US1, Key Entities all updated consistently. |
+| CHK014 | FR-015 specified CRITICAL only; checklist input said CRITICAL,HIGH | T009 | **RESOLVED**: CRITICAL blocks publication (`exit-code: 1`); HIGH is reported in workflow summary but does NOT block. spec.md FR-015 updated to make this explicit. |
 
 ---
 
