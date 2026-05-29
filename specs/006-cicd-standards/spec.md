@@ -2,7 +2,7 @@
 
 **Feature Branch**: `006-cicd-standards`  
 **Created**: 2026-05-29  
-**Status**: Draft  
+**Status**: Clarified — ready for planning  
 **Module**: Module 1.B — Standards & CI/CD (Partie 1 — Setup, Semaine 1)
 
 ---
@@ -113,7 +113,7 @@ An operations engineer investigating a slow document processing job can search l
 - **FR-002**: Each CI job MUST be individually cancellable and independently reportable to the pull request status.
 - **FR-003**: Job 1 MUST fail immediately on any hexagonal architecture rule violation, without running remaining test suites.
 - **FR-004**: Job 2 MUST activate container reuse to reduce startup overhead on the CI runner.
-- **FR-005**: All jobs MUST cap JVM heap usage to prevent out-of-memory failures on shared CI runners (512 MB for jobs 1–2, 1 GB for job 3).
+- **FR-005**: All jobs run on **`ubuntu-latest` GitHub-hosted runners** (7 GB RAM). JVM heap MUST be capped via `MAVEN_OPTS`: `-Xmx512m` for jobs 1 and 2, `-Xmx1g` for job 3 (mutation testing). Container reuse (`TESTCONTAINERS_REUSE_ENABLE=true`) MUST be enabled on job 2 to stay within memory bounds (ADR-008).
 - **FR-006**: Job 3 MUST run Checkstyle validation; any violation of the method length, parameter count, or cyclomatic complexity limits MUST fail the build.
 - **FR-007**: The `docai-domain` module MUST achieve at least 90% test coverage; any PR dropping below this threshold MUST be blocked.
 - **FR-008**: Global project test coverage MUST remain at or above 80%; PRs violating this MUST be blocked.
@@ -130,8 +130,11 @@ An operations engineer investigating a slow document processing job can search l
 - **FR-013**: The Docker build MUST use a multi-stage process: a build stage producing the application artifact, and a runtime stage using JRE 21 on Alpine Linux.
 - **FR-014**: The runtime container MUST run the application process as the non-root user `docai`.
 - **FR-015**: The image MUST be scanned for vulnerabilities before publication; images with at least one CRITICAL-severity vulnerability MUST NOT be published.
+- **FR-015b**: The published image MUST be pushed to **GitHub Container Registry (ghcr.io)** using the workflow's `GITHUB_TOKEN`; no additional registry credentials are required.
 
 #### Kubernetes Manifests
+
+- **FR-015c**: The production deployment job (`04-deploy-production.yml`) MUST require explicit manual approval from a designated reviewer via a GitHub Environment protection rule before any deployment step executes. The staging deployment (`03-deploy-staging.yml`) does NOT require manual approval.
 
 - **FR-016**: The deployment manifest MUST define resource requests and limits, liveness and readiness probes, and rolling update strategy.
 - **FR-017**: The service manifest MUST expose the application on its designated internal port.
@@ -139,10 +142,11 @@ An operations engineer investigating a slow document processing job can search l
 
 #### Feature Flags
 
-- **FR-019**: The system MUST define and configure exactly 6 feature flags in the feature flag management system.
+- **FR-019**: The system MUST define and configure exactly 6 feature flags in the **self-hosted Unleash** instance (service `unleash` in `docker-compose.yml`, image `unleashorg/unleash-server`, backed by a dedicated PostgreSQL container).
+- **FR-019b**: The `docker-compose.yml` MUST include the `unleash` service and its PostgreSQL dependency so that `docker compose up -d` starts a fully functional Unleash instance at `http://localhost:4242`.
 - **FR-020**: Each feature flag MUST support per-tenant targeting so the same flag can be active for one tenant and inactive for another simultaneously.
 - **FR-021**: Feature flag state changes MUST take effect at runtime without requiring an application restart or redeployment.
-- **FR-022**: When the feature flag service is unavailable, the application MUST fall back to safe default values (flags treated as disabled) without crashing.
+- **FR-022**: When the Unleash service is unavailable, the application MUST fall back to safe default values (flags treated as disabled) without crashing.
 
 #### Observability
 
@@ -150,7 +154,8 @@ An operations engineer investigating a slow document processing job can search l
 - **FR-024**: The application MUST propagate `traceId` across all inbound and outbound calls; if no `traceId` is present on an incoming request, one MUST be generated automatically.
 - **FR-025**: The application MUST expose operational metrics covering request throughput, error rates, and JVM resource consumption.
 - **FR-026**: The application MUST integrate with the distributed tracing system so that all spans produced by a single request are linked under the same trace.
-- **FR-027**: In the development environment, slow database queries exceeding a configurable threshold MUST be logged with their execution plan for diagnostic use.
+- **FR-027**: In the development environment, slow database queries exceeding a configurable threshold MUST be logged with their execution plan for diagnostic use (ADR-010).
+- **FR-027b**: New MongoDB queries introduced in a pull request MUST be reviewed manually by the PR reviewer against the ADR-010 checklist (verify index usage, avoid COLLSCAN on large collections). This check is NOT automated in CI — it is a required step in the PR review process.
 
 ### Key Entities
 
@@ -180,12 +185,25 @@ An operations engineer investigating a slow document processing job can search l
 
 ---
 
+## Clarifications
+
+### Session 2026-05-29
+
+- Q: Docker container registry — ghcr.io or Docker Hub or AWS ECR? → A: **ghcr.io** (GitHub Container Registry; uses `GITHUB_TOKEN`, no extra secrets)
+- Q: Production deployment gate — manual approval or automatic or tag-based? → A: **Manual approval** via GitHub Environment `production` with required reviewers
+- Q: Unleash hosting — self-hosted docker-compose or SaaS cloud or in-house? → A: **Self-hosted** in `docker-compose.yml` (image `unleashorg/unleash-server` + dedicated PostgreSQL; URL `http://localhost:4242` locally)
+- Q: GitHub Actions runner type (ADR-008) — ubuntu-latest 7 GB or self-hosted or hybrid? → A: **`ubuntu-latest`** (GitHub-hosted); ADR-008 resolves OOM via `MAVEN_OPTS=-Xmx512m` (jobs 1–2), `-Xmx1g` (job 3), and `TESTCONTAINERS_REUSE_ENABLE=true`
+- Q: ADR-010 EXPLAIN PLAN gate — manual PR review or automated CI script or hybrid? → A: **Manual PR review** — reviewer checks EXPLAIN PLAN for new MongoDB queries before approving; ADR-010 documents the review checklist
+
+---
+
 ## Assumptions
 
 - The GitHub repository uses branch protection rules that consume CI job statuses to block direct merges to `main`.
-- The container registry (e.g., GitHub Container Registry or equivalent) is already provisioned and accessible from the CI environment.
+- The container registry is **ghcr.io** (GitHub Container Registry). It is accessible from CI via the built-in `GITHUB_TOKEN`; no external registry secrets are required.
 - A Kubernetes staging cluster is already available; `kubectl` access credentials are stored as CI secrets.
-- The feature flag service (Unleash) is already running in the shared infrastructure (see Docker Compose services); the application only needs to connect and register flags.
+- A GitHub Environment named `production` is configured with at least one required reviewer. The `staging` environment has no required reviewers (auto-deploys on successful Docker publish).
+- Unleash is **self-hosted**: added to `docker-compose.yml` as service `unleash` (image `unleashorg/unleash-server`) with a dedicated PostgreSQL container. Local URL: `http://localhost:4242`. The application connects via the Unleash Java SDK using an API token stored as an environment variable.
 - Auto-generated code (produced by annotation processors such as Lombok or MapStruct) is excluded from Checkstyle and coverage enforcement.
 - The distributed tracing system and metrics collection infrastructure are part of the shared Docker Compose stack (Grafana Tempo, Prometheus); the application only adds the integration layer.
 - ADR-008 is in force: memory limits (512 MB for jobs 1–2, 1 GB for job 3) and container reuse for integration tests are non-negotiable CI constraints.
