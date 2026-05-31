@@ -140,11 +140,11 @@ MAVEN_OPTS=-Xmx1g mvn verify sonar:sonar -P quality-gates \
 ## Apply Kubernetes Manifests (Staging)
 
 ```bash
-# Dry run first
-kubectl apply --dry-run=client -f k8s/
+# Dry run first (uses Kustomize overlay — k8s/ root contains kustomization.yaml)
+kubectl apply --dry-run=client -k k8s/overlays/staging
 
 # Apply (requires KUBECONFIG configured for staging)
-kubectl apply -f k8s/
+kubectl apply -k k8s/overlays/staging
 
 # Verify rollout
 kubectl rollout status deployment/docai-backend --timeout=120s

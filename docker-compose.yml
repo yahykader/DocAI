@@ -312,6 +312,7 @@ services:
     environment:
       DATABASE_URL: postgresql://unleash:unleash@unleash-db/unleash   # LOCAL PROFILE ONLY (SEC-004)
       INIT_FRONTEND_API_TOKENS: "*:*.unleash-insecure-api-token"      # LOCAL PROFILE ONLY (SEC-004)
+      INIT_ADMIN_API_TOKENS: "default:*.unleash-insecure-admin-token" # LOCAL PROFILE ONLY — admin token for flag provisioning (SEC-004)
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:4242/health" ]
       interval: 10s
@@ -330,11 +331,11 @@ services:
         condition: service_healthy
     environment:
       UNLEASH_URL: http://unleash:4242
-      # LOCAL PROFILE ONLY — matches INIT_FRONTEND_API_TOKENS in unleash service (SEC-004)
-      UNLEASH_TOKEN: "*:*.unleash-insecure-api-token"
+      # LOCAL PROFILE ONLY — admin token matches INIT_ADMIN_API_TOKENS in unleash service; required for POST /api/admin/* (SEC-004)
+      UNLEASH_TOKEN: "default:*.unleash-insecure-admin-token"
     entrypoint: >
       sh -c '
-      echo "Provisioning Unleash feature flags..."
+      echo "Provisioning Unleash feature flags (FR-019)..."
 
       create_flag() {
         curl -sf -X POST "$$UNLEASH_URL/api/admin/projects/default/features" \
@@ -345,12 +346,12 @@ services:
           || echo "Flag already exists (skipped): $$1"
       }
 
-      create_flag "docai.document.classification.enabled"
-      create_flag "docai.document.extraction.llm.enabled"
-      create_flag "docai.document.fraud.detection.enabled"
-      create_flag "docai.document.ocr.enabled"
-      create_flag "docai.billing.quota.enforcement.enabled"
-      create_flag "docai.pipeline.async.enabled"
+      create_flag "billing.enabled"
+      create_flag "fraud.v2.enabled"
+      create_flag "extraction.mistral.enabled"
+      create_flag "dashboard.search.enabled"
+      create_flag "notifications.inapp.enabled"
+      create_flag "maintenance.mode"
 
       echo "Feature flag provisioning complete."
       '
