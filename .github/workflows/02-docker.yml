@@ -50,7 +50,7 @@ jobs:
 
       # CRITICAL CVE gate — blocks publication if any CRITICAL vulnerability found
       - name: Trivy scan — CRITICAL (publication gate)
-        uses: aquasecurity/trivy-action@915b19bbe73b92a6cf82a1bc12b087c9a19a5fe2 # 0.28.0
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # 0.36.0
         with:
           image-ref: ${{ env.IMAGE_NAME }}:${{ github.sha }}
           format: table
@@ -60,7 +60,7 @@ jobs:
 
       # HIGH CVE reporting — informational only, does not block publication
       - name: Trivy scan — HIGH (reporting)
-        uses: aquasecurity/trivy-action@915b19bbe73b92a6cf82a1bc12b087c9a19a5fe2 # 0.28.0
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # 0.36.0
         with:
           image-ref: ${{ env.IMAGE_NAME }}:${{ github.sha }}
           format: table
