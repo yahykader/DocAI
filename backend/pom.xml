@@ -99,7 +99,7 @@
         <spring-cloud-contract.version>4.1.1</spring-cloud-contract.version>
 
         <!-- Feature Flags -->
-        <unleash.version>9.2.0</unleash.version>
+        <unleash.version>12.2.2</unleash.version>
 
         <!-- LLM Integration -->
         <langchain4j.version>0.31.0</langchain4j.version>
