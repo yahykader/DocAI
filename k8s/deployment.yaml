@@ -1,3 +1,6 @@
+# Base manifest — namespace is docai-staging.
+# For production, use: kubectl apply -k k8s/overlays/production
+# CI rolling updates use kubectl set image --namespace <ns> directly (see 03-deploy-staging.yml, 04-deploy-production.yml).
 apiVersion: apps/v1
 kind: Deployment
 metadata:

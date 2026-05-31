@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-// Fail-safe: any Throwable from the Unleash SDK returns false — callers must never see an exception (TASK-SEC-003)
+// Fail-safe: any Exception from the Unleash SDK returns false — callers must never see an exception (TASK-SEC-003)
 @Component
 public class UnleashFeatureFlagAdapter implements FeatureFlagPort {
 
@@ -23,7 +23,7 @@ public class UnleashFeatureFlagAdapter implements FeatureFlagPort {
     public boolean isEnabled(String flagName) {
         try {
             return unleash.isEnabled(flagName);
-        } catch (Throwable e) {
+        } catch (Exception e) {
             log.warn("Unleash unavailable for flag {} — failing safe to false", flagName, e);
             return false;
         }
@@ -35,7 +35,7 @@ public class UnleashFeatureFlagAdapter implements FeatureFlagPort {
             // tenantId maps to Unleash userId dimension — used by tenant-scoped gradual rollout strategies
             UnleashContext context = UnleashContext.builder().userId(tenantId).build();
             return unleash.isEnabled(flagName, context);
-        } catch (Throwable e) {
+        } catch (Exception e) {
             log.warn("Unleash unavailable for flag {} (tenantId={}) — failing safe to false", flagName, tenantId, e);
             return false;
         }

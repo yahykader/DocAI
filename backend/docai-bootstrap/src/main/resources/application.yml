@@ -239,8 +239,8 @@ mongock:
 docai:
   unleash:
     url: ${UNLEASH_URL:http://localhost:4242}
-    # UNLEASH_API_TOKEN must be set — staging/prod: scoped token via AWS Secrets Manager (SEC-004); locally: *:*.unleash-insecure-api-token (see docker-compose.yml)
-    api-token: ${UNLEASH_API_TOKEN}
+    # staging/prod: scoped token via AWS Secrets Manager (SEC-004); locally: default insecure token matches docker-compose.yml INIT_FRONTEND_API_TOKENS
+    api-token: ${UNLEASH_API_TOKEN:*:*.unleash-insecure-api-token}   # SEC-004: override with scoped token in staging/prod
     app-name: docai-backend
     environment: ${SPRING_PROFILES_ACTIVE:local}
     polling-interval: 15   # seconds — supports SC-006: flag toggle effective within 30s

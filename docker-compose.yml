@@ -302,7 +302,7 @@ services:
       - docai-network
 
   unleash:
-    image: unleashorg/unleash-server:latest
+    image: unleashorg/unleash-server:5.13.0
     container_name: docai-unleash
     depends_on:
       unleash-db:
@@ -318,6 +318,42 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
+    networks:
+      - docai-network
+
+  # Unleash feature flag initialization — provisions 6 flags required by FR-019
+  unleash-init:
+    image: curlimages/curl:8.7.1
+    container_name: docai-unleash-init
+    depends_on:
+      unleash:
+        condition: service_healthy
+    environment:
+      UNLEASH_URL: http://unleash:4242
+      # LOCAL PROFILE ONLY — matches INIT_FRONTEND_API_TOKENS in unleash service (SEC-004)
+      UNLEASH_TOKEN: "*:*.unleash-insecure-api-token"
+    entrypoint: >
+      sh -c '
+      echo "Provisioning Unleash feature flags..."
+
+      create_flag() {
+        curl -sf -X POST "$$UNLEASH_URL/api/admin/projects/default/features" \
+          -H "Authorization: $$UNLEASH_TOKEN" \
+          -H "Content-Type: application/json" \
+          -d "{\"name\": \"$$1\", \"type\": \"release\", \"enabled\": false}" \
+          && echo "Created flag: $$1" \
+          || echo "Flag already exists (skipped): $$1"
+      }
+
+      create_flag "docai.document.classification.enabled"
+      create_flag "docai.document.extraction.llm.enabled"
+      create_flag "docai.document.fraud.detection.enabled"
+      create_flag "docai.document.ocr.enabled"
+      create_flag "docai.billing.quota.enforcement.enabled"
+      create_flag "docai.pipeline.async.enabled"
+
+      echo "Feature flag provisioning complete."
+      '
     networks:
       - docai-network
 
