@@ -70,7 +70,7 @@
         <mongock.version>5.4.4</mongock.version>
 
         <!-- Document Processing -->
-        <tess4j.version>5.13.0</tess4j.version>
+        <tess4j.version>5.19.0</tess4j.version>
         <pdfbox.version>3.0.3</pdfbox.version>
         <tika.version>2.9.2</tika.version>
         <javacv.version>1.5.11</javacv.version>
