@@ -20,20 +20,21 @@ spec:
       labels:
         app: docai-backend
     spec:
-      securityContext:
+      securityContext:              # pod-level: identity constraints only (SEC-001)
         runAsNonRoot: true
-        runAsUser: 1001         # UID of user "docai" created in Dockerfile (SEC-001)
-        readOnlyRootFilesystem: true
-        allowPrivilegeEscalation: false
-        capabilities:
-          drop: [ALL]           # SEC-001: drop all Linux capabilities
+        runAsUser: 1001             # UID of user "docai" created in Dockerfile (SEC-001)
       volumes:
         - name: tmp-dir
-          emptyDir: {}          # Spring Boot writes temp files to /tmp (readOnlyRootFilesystem workaround)
+          emptyDir: {}              # Spring Boot writes temp files to /tmp (readOnlyRootFilesystem workaround)
       containers:
         - name: docai-backend
-          image: ghcr.io/docai/docai-backend:latest
+          image: ghcr.io/docai/docai-backend:DEPLOY_SHA  # substituted by kubectl set image in CI
           imagePullPolicy: Always
+          securityContext:          # container-level: filesystem and capability constraints (SEC-001)
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
           ports:
             - name: http
               containerPort: 8080
@@ -49,6 +50,12 @@ spec:
             limits:
               memory: 1Gi
               cpu: 1000m
+          startupProbe:             # absorbs slow first-boot: JVM warm-up + Mongock + Kafka + 11 modules
+            httpGet:
+              path: /actuator/health/liveness
+              port: 9091
+            failureThreshold: 12    # 12 × 10s = 120s max startup window before liveness kicks in
+            periodSeconds: 10
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness
@@ -60,7 +67,7 @@ spec:
             httpGet:
               path: /actuator/health/readiness
               port: 9091
-            initialDelaySeconds: 30
+            initialDelaySeconds: 60
             periodSeconds: 10
             failureThreshold: 3
           env:

@@ -53,7 +53,7 @@ kubectl auth can-i delete namespaces \
 If the cluster supports OIDC federation (IRSA on EKS, Workload Identity on GKE), replace the
 kubeconfig secret with OIDC configuration:
 
-- **EKS (IRSA)**: add `AWS_ROLE_ARN` secret; use `id-token: write` permission already declared in workflow
+- **EKS (IRSA)**: add `AWS_ROLE_ARN` secret; `id-token: write` is pre-positioned in workflow permissions but currently unused — switching to OIDC eliminates the `KUBE_CONFIG_STAGING` / `KUBE_CONFIG_PRODUCTION` secret dependency
 - **GKE (Workload Identity)**: add `GCP_SERVICE_ACCOUNT` and `GCP_WORKLOAD_IDENTITY_PROVIDER` secrets
 
 OIDC federation eliminates long-lived credentials entirely and is the preferred approach when

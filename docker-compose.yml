@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
   # ==================== DATABASE ====================
   mongodb:
@@ -287,10 +285,11 @@ services:
     container_name: docai-unleash-db
     ports:
       - "5433:5432"   # offset to avoid conflict with keycloak-db on 5432
+    # LOCAL PROFILE ONLY — staging/prod uses AWS Secrets Manager (SEC-004)
     environment:
       POSTGRES_DB: unleash
       POSTGRES_USER: unleash
-      POSTGRES_PASSWORD: unleash   # LOCAL PROFILE ONLY — staging/prod uses AWS Secrets Manager (SEC-004)
+      POSTGRES_PASSWORD: unleash
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U unleash" ]
       interval: 10s

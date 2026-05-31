@@ -67,7 +67,7 @@
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-registry-prometheus</artifactId>
         </dependency>
-        <!-- H-2: OTel MDC bridge — injects traceId into MDC automatically (FR-OBS-002) -->
+        <!-- OTel MDC bridge — injects traceId into MDC automatically (FR-OBS-002) -->
         <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-tracing-bridge-otel</artifactId>

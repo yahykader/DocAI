@@ -7,11 +7,11 @@ All secrets are stored in AWS Secrets Manager. Rotation is enforced by an AWS Co
 
 | Secret Name (AWS Secrets Manager) | Service | Rotation Period | Rule |
 |-----------------------------------|---------|-----------------|------|
-| `docai/prod/openai-api-key` | OpenAI / LLM adapter | **90 days** | BR-ROT-001 |
+| `docai/prod/claude-api-key` | Claude API / LLM adapter | **90 days** | BR-ROT-001 |
 | `docai/prod/keycloak-admin-password` | Keycloak 26 | **90 days** | BR-ROT-001 |
 | `docai/prod/stripe-secret-key` | Stripe billing | **90 days** | BR-ROT-001 |
 | `docai/prod/mongodb-uri` | MongoDB Atlas | **180 days** | BR-ROT-002 |
-| `docai/staging/openai-api-key` | OpenAI / LLM adapter (staging) | **90 days** | BR-ROT-001 |
+| `docai/staging/claude-api-key` | Claude API / LLM adapter (staging) | **90 days** | BR-ROT-001 |
 | `docai/staging/keycloak-admin-password` | Keycloak 26 (staging) | **90 days** | BR-ROT-001 |
 | `docai/staging/stripe-secret-key` | Stripe billing (staging) | **90 days** | BR-ROT-001 |
 | `docai/staging/mongodb-uri` | MongoDB Atlas (staging) | **180 days** | BR-ROT-002 |

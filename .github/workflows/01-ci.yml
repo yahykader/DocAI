@@ -129,10 +129,9 @@ jobs:
           # -Xmx1g required for PIT mutation testing (ADR-008)
           MAVEN_OPTS: -Xmx1g
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        # Replace <org> with your GitHub / SonarCloud organisation slug
         run: |
           cd backend && mvn verify sonar:sonar \
             -P quality-gates \
             -DskipPit \
-            -Dsonar.projectKey=<org>_docai-backend \
-            -Dsonar.organization=<org>
+            -Dsonar.projectKey=${{ vars.SONAR_ORG }}_docai-backend \
+            -Dsonar.organization=${{ vars.SONAR_ORG }}
