@@ -98,6 +98,9 @@
         <springdoc.version>2.8.6</springdoc.version>
         <spring-cloud-contract.version>4.1.1</spring-cloud-contract.version>
 
+        <!-- Feature Flags -->
+        <unleash.version>9.2.0</unleash.version>
+
         <!-- LLM Integration -->
         <langchain4j.version>0.31.0</langchain4j.version>
 
@@ -198,6 +201,13 @@
                 <groupId>fr.docai</groupId>
                 <artifactId>docai-adapter-out-external</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+
+            <!-- === FEATURE FLAGS === -->
+            <dependency>
+                <groupId>io.getunleash</groupId>
+                <artifactId>unleash-client-java</artifactId>
+                <version>${unleash.version}</version>
             </dependency>
 
             <!-- === OBSERVABILITY: JSON LOGGING === -->

@@ -281,6 +281,47 @@ services:
     networks:
       - docai-network
 
+  # ==================== FEATURE FLAGS ====================
+  unleash-db:
+    image: postgres:16-alpine
+    container_name: docai-unleash-db
+    ports:
+      - "5433:5432"   # offset to avoid conflict with keycloak-db on 5432
+    environment:
+      POSTGRES_DB: unleash
+      POSTGRES_USER: unleash
+      POSTGRES_PASSWORD: unleash   # LOCAL PROFILE ONLY — staging/prod uses AWS Secrets Manager (SEC-004)
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U unleash" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    volumes:
+      - unleash_db_data:/var/lib/postgresql/data
+    networks:
+      - docai-network
+
+  unleash:
+    image: unleashorg/unleash-server:latest
+    container_name: docai-unleash
+    depends_on:
+      unleash-db:
+        condition: service_healthy
+    ports:
+      - "4242:4242"
+    environment:
+      DATABASE_URL: postgresql://unleash:unleash@unleash-db/unleash   # LOCAL PROFILE ONLY (SEC-004)
+      INIT_FRONTEND_API_TOKENS: "*:*.unleash-insecure-api-token"      # LOCAL PROFILE ONLY (SEC-004)
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:4242/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - docai-network
+
   # ==================== OBSERVABILITY ====================
   prometheus:
     image: prom/prometheus:latest
@@ -357,6 +398,8 @@ services:
       - docai-network
 
 volumes:
+  unleash_db_data:
+    driver: local
   mongodb_data:
     driver: local
   mongodb_config:

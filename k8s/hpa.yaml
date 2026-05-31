@@ -1,0 +1,19 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: docai-backend
+  namespace: docai-staging
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: docai-backend
+  minReplicas: 2   # BR-K8S-004: HA minimum — never scale below 2 replicas
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70   # BR-K8S-004: scale out at 70% CPU to leave headroom

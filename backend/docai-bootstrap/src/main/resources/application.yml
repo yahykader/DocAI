@@ -237,6 +237,13 @@ mongock:
 
 # Application-specific properties
 docai:
+  unleash:
+    url: ${UNLEASH_URL:http://localhost:4242}
+    # UNLEASH_API_TOKEN default is local profile only. Staging/prod: scoped token in AWS Secrets Manager, mounted via CSI Driver.
+    api-token: ${UNLEASH_API_TOKEN:*:*.unleash-insecure-api-token}  # local profile only — SEC-004
+    app-name: docai-backend
+    environment: ${SPRING_PROFILES_ACTIVE:local}
+    polling-interval: 15   # seconds — supports SC-006: flag toggle effective within 30s
   aws:
     region: ${AWS_REGION:eu-west-1}
     s3-bucket: ${S3_BUCKET:docai-dev}
