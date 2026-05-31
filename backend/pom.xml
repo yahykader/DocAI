@@ -58,7 +58,7 @@
 
         <!-- Mapping & Data -->
         <mapstruct.version>1.6.3</mapstruct.version>
-        <lombok.version>1.18.36</lombok.version>
+        <lombok.version>1.18.46</lombok.version>
 
         <!-- Serialization & Schema -->
         <avro.version>1.11.4</avro.version>
