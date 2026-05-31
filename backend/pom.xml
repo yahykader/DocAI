@@ -73,7 +73,7 @@
         <tess4j.version>5.13.0</tess4j.version>
         <pdfbox.version>3.0.3</pdfbox.version>
         <tika.version>2.9.2</tika.version>
-        <javacv.version>1.5.11</javacv.version>
+        <javacv.version>1.5.13</javacv.version>
         <!-- JavaCV Platform includes native bindings for all OS (fixes transitive javacpp conflicts) -->
         <javacpp.version>1.5.11</javacpp.version>
 
