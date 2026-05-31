@@ -50,7 +50,7 @@
 
         <!-- Code Quality: Checkstyle, SonarCloud -->
         <checkstyle.version>10.13.0</checkstyle.version>
-        <sonarcloud.maven.plugin.version>3.10.0.2594</sonarcloud.maven.plugin.version>
+        <sonarcloud.maven.plugin.version>5.7.0.6970</sonarcloud.maven.plugin.version>
 
         <!-- Resilience & Rate Limiting — 2.4.2 (plan.md cible 2.3.0 ; bump requis pour compatibilité Spring Boot 4.0.x + fix CB slidingWindowSize) -->
         <resilience4j.version>2.3.0</resilience4j.version>
