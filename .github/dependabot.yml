@@ -1,0 +1,29 @@
+version: 2
+
+updates:
+  # Maven dependencies (backend) — weekly cadence (BR-DEP-002)
+  - package-ecosystem: maven
+    directory: /backend
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Europe/Paris
+    open-pull-requests-limit: 10
+    labels:
+      - dependencies
+      - java
+
+  # GitHub Actions (SHA-pinned) — weekly updates via Dependabot (SEC-002)
+  # Dependabot bumps the SHA automatically when a new version is tagged
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Europe/Paris
+    open-pull-requests-limit: 10
+    labels:
+      - dependencies
+      - github-actions

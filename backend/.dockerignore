@@ -1,0 +1,53 @@
+# DocAI Backend — Docker build context exclusions
+# Build context: ./backend
+# These paths are relative to the ./backend directory.
+
+# Maven build artifacts — never needed in Docker build context
+*/target/
+target/
+*.jar
+*.war
+
+# IDE and editor files
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+*.swp
+*.swo
+
+# Version control
+.git/
+.gitignore
+
+# Documentation
+*.md
+
+# Environment and secrets — must never enter the build context
+.env
+.env.*
+*.key
+*.pem
+*.p12
+*.jks
+
+# Test reports and quality analysis outputs
+*/target/surefire-reports/
+*/target/failsafe-reports/
+*/target/pit-reports/
+*/target/site/
+.scannerwork/
+checkstyle-results.xml
+jacoco.xml
+
+# Logs and temp files
+*.log
+logs/
+*.tmp
+*.bak
+.temp/
+
+# OS artefacts
+.DS_Store
+Thumbs.db

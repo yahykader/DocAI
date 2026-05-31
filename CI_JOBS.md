@@ -2,11 +2,17 @@
 
 ## Overview
 
-Three separate CI jobs enforce code quality and architectural integrity. Each job is independent and runs `MAVEN_OPTS=-Xmx512m` for memory efficiency.
+Five separate CI jobs enforce code quality and architectural integrity. Each job uses `MAVEN_OPTS=-Xmx512m` (jobs 1–4) or `MAVEN_OPTS=-Xmx1g` (job 5 — mutation testing). Jobs 2, 3, and 4 each depend on job 1. Job 5 depends on jobs 2 and 3.
+
+```
+unit-tests ──┬── integration ──────────────────┬── sonarcloud
+             ├── bdd-tests ─────────────────────┘
+             └── contract-tests
+```
 
 ---
 
-## Job 1: Unit Tests (ci-job=unit-tests)
+## Job 1: Unit Tests (`unit-tests`)
 
 **Purpose**: Fast feedback on unit test coverage and ArchUnit architecture validation.
 
@@ -17,130 +23,150 @@ MAVEN_OPTS=-Xmx512m mvn clean test -P unit-tests
 
 **What runs**:
 - All JUnit 5 unit tests (`*Test.java`, `*Tests.java`)
-- ArchUnit 12 hexagonal architecture rules (docai-bootstrap module)
+- ArchUnit 12 hexagonal architecture rules (`docai-bootstrap` module)
 - Mockito mocks and assertions
 - Excludes integration tests (`*IT.java`, `*ITs.java`)
 
 **Coverage Requirements**:
 - Global: ≥ 80% (JaCoCo)
-- Domain (`docai-domain`): ≥ 90% (target for highest quality)
+- Domain (`docai-domain`): ≥ 90%
 
-**Expected Duration**: ~2-3 minutes
+**Expected Duration**: ~2–3 minutes
 
-**Fails if**:
-- Unit test failures
-- ArchUnit rule violations (12 rules enforcing hexagonal architecture)
-- Coverage below threshold
+**Fails if**: unit test failures, ArchUnit violations, coverage below threshold
 
 ---
 
-## Job 2: Integration Tests (ci-job=integration-tests)
+## Job 2: Integration Tests (`integration`)
 
-**Purpose**: End-to-end testing with real services (TestContainers, MongoDB Replica Set, Kafka).
+**Purpose**: End-to-end testing with real services (TestContainers — MongoDB Replica Set, Kafka).
 
 **Command**:
 ```bash
-MAVEN_OPTS=-Xmx512m mvn clean verify -P integration-tests
+TESTCONTAINERS_REUSE_ENABLE=true MAVEN_OPTS=-Xmx512m mvn clean verify -P integration-tests
 ```
 
 **What runs**:
 - Integration tests (`*IT.java`, `*ITs.java`)
-- Cucumber BDD scenarios (if defined)
-- WireMock stubbed external API calls
-- TestContainers for MongoDB, Kafka (isolated environments)
-- Excludes unit tests (run separately in Job 1)
+- WireMock stubs for external API calls
+- TestContainers for MongoDB, Kafka (isolated, reused across run)
 
-**Requirements for Integration Tests**:
-- Docker daemon running (for TestContainers)
-- Minimal 512MB heap
-- No external service dependencies (TestContainers provide isolation)
+**Requirements**: Docker daemon running; `TESTCONTAINERS_REUSE_ENABLE=true` required (ADR-008 OOM prevention)
 
-**Expected Duration**: ~5-10 minutes (depends on TestContainers startup)
+**Expected Duration**: ~5–10 minutes
 
-**Fails if**:
-- Integration test failures
-- BDD scenario failures
-- External API mocks (WireMock) not matching expected contracts
+**Fails if**: integration test failures, WireMock contract mismatches
 
 ---
 
-## Job 3: Quality Gates (ci-job=quality-gates)
+## Job 3: BDD Tests (`bdd-tests`)
 
-**Purpose**: Enforces code standards and mutation testing for domain robustness.
+**Purpose**: Cucumber BDD scenarios against real services.
 
 **Command**:
 ```bash
-MAVEN_OPTS=-Xmx512m mvn clean verify -P quality-gates
+TESTCONTAINERS_REUSE_ENABLE=true MAVEN_OPTS=-Xmx512m mvn clean verify -P integration-tests -Dcucumber.filter.tags=@bdd
 ```
 
 **What runs**:
-1. **Unit Tests** (for coverage): Runs all unit tests to gather code coverage metrics
-2. **Checkstyle** (code formatting): Max 20-line methods, 4 parameters, cyclomatic complexity ≤ 10
-3. **PIT Mutation Testing**:
-   - Domain (`docai-domain`): ≥ 85% mutation score
-   - Global: ≥ 80% mutation score
-4. **JaCoCo Coverage Report**: Generates HTML coverage report
-5. **SonarCloud**: Code quality analysis (0 bugs, 0 vulnerabilities, ≤ 3% duplication)
+- Cucumber scenarios tagged `@bdd`
+- TestContainers (reused — shared with job 2 startup cache)
 
-**Expected Duration**: ~8-15 minutes (PIT mutation testing is slow)
+**Requirements**: Docker daemon running; `TESTCONTAINERS_REUSE_ENABLE=true` required (ADR-008)
 
-**Fails if**:
-- Checkstyle violations (code style)
-- Mutation score below threshold
-- SonarCloud rules violated (bugs, vulnerabilities, duplication)
+**Expected Duration**: ~3–7 minutes
+
+**Fails if**: BDD scenario failures
+
+---
+
+## Job 4: Contract Tests (`contract-tests`)
+
+**Purpose**: Spring Cloud Contract verification — consumer-driven contract tests.
+
+**Command**:
+```bash
+MAVEN_OPTS=-Xmx512m mvn spring-cloud-contract:generateTests verify
+```
+
+**Expected Duration**: ~2–4 minutes
+
+**Fails if**: generated contract tests fail, stubs not matching
+
+---
+
+## Job 5: SonarCloud / Quality Gates (`sonarcloud`)
+
+**Purpose**: Enforces code standards, mutation testing, and SonarCloud analysis.
+
+**Command**:
+```bash
+MAVEN_OPTS=-Xmx1g mvn verify sonar:sonar -P quality-gates -DskipPit
+```
+
+**Note**: `-Xmx1g` (not 512m) — mutation testing requires more heap (ADR-008).
+
+**What runs**:
+1. Unit tests (for coverage metrics)
+2. Checkstyle: max 20-line methods, 4 parameters, cyclomatic complexity ≤ 10, class length ≤ 200 lines
+3. PIT Mutation Testing: domain ≥ 85%, global ≥ 80%
+4. JaCoCo Coverage Report
+5. SonarCloud: 0 bugs, 0 vulnerabilities, ≤ 3% duplication
+
+**Expected Duration**: ~8–15 minutes
+
+**Fails if**: Checkstyle violations, mutation score below threshold, SonarCloud quality gate failure
 
 ---
 
 ## Local Development Workflow
 
-### Run All Jobs Locally (Simulating CI)
-
 ```bash
-# 1. Unit tests
+cd backend
+
+# 1. Fast unit tests (2–3 min)
 MAVEN_OPTS=-Xmx512m mvn clean test -P unit-tests
 
-# 2. Integration tests (requires Docker)
-MAVEN_OPTS=-Xmx512m mvn clean verify -P integration-tests
+# 2. Integration tests (5–10 min, requires Docker)
+TESTCONTAINERS_REUSE_ENABLE=true MAVEN_OPTS=-Xmx512m mvn clean verify -P integration-tests
 
-# 3. Quality gates (slow, but comprehensive)
-MAVEN_OPTS=-Xmx512m mvn clean verify -P quality-gates
-```
+# 3. BDD tests
+TESTCONTAINERS_REUSE_ENABLE=true MAVEN_OPTS=-Xmx512m mvn clean verify -P integration-tests -Dcucumber.filter.tags=@bdd
 
-### Quick Local Build (Before Commit)
+# 4. Contract tests
+MAVEN_OPTS=-Xmx512m mvn spring-cloud-contract:generateTests verify
 
-```bash
-# Fast feedback: unit tests + ArchUnit only
-mvn clean test -P unit-tests
+# 5. Quality gates (slow — run before PR)
+MAVEN_OPTS=-Xmx1g mvn verify sonar:sonar -P quality-gates -DskipPit
 ```
 
 ### View Coverage Report
 
 ```bash
-# After running Job 3, JaCoCo generates HTML reports
 open docai-domain/target/site/jacoco/index.html
 ```
 
 ### View PIT Mutation Report
 
 ```bash
-# After running Job 3, PIT generates detailed mutation report
 open docai-domain/target/pit-reports/index.html
 ```
 
 ---
 
-## Memory Management
+## Memory Management (ADR-008)
 
-All jobs use `MAVEN_OPTS=-Xmx512m` to:
-- Run reliably in CI with limited resources
-- Prevent out-of-memory errors (especially with PIT mutation testing)
-- Keep build times predictable
-
-**Local Development**: Can use larger heap if needed (e.g., `-Xmx1g`)
+| Job | `MAVEN_OPTS` | `TESTCONTAINERS_REUSE_ENABLE` | Reason |
+|-----|-------------|-------------------------------|--------|
+| unit-tests | `-Xmx512m` | — | No containers |
+| integration | `-Xmx512m` | `true` | OOM prevention on 7 GB runner |
+| bdd-tests | `-Xmx512m` | `true` | OOM prevention on 7 GB runner |
+| contract-tests | `-Xmx512m` | — | No containers |
+| sonarcloud | `-Xmx1g` | — | PIT mutation testing needs more heap |
 
 ---
 
-## Architecture Rules (12 ArchUnit Rules - Enforced in Job 1)
+## Architecture Rules (12 ArchUnit Rules — Enforced in Job 1)
 
 Hexagonal architecture validation in `docai-bootstrap/src/test/java/fr/docai/bootstrap/HexagonalArchitectureTest.java`:
 
@@ -159,55 +185,104 @@ Hexagonal architecture validation in `docai-bootstrap/src/test/java/fr/docai/boo
 
 ---
 
-## CI Configuration Example (GitHub Actions / GitLab CI)
+## CI Configuration Example (GitHub Actions)
 
-### GitHub Actions `.github/workflows/ci.yml`
+All third-party `uses:` references MUST be pinned to full commit SHA — never version tags like `@v3` or `@main` (SEC-002). Use Dependabot (`github-actions` ecosystem, weekly) to receive automated SHA-update PRs.
 
 ```yaml
 name: CI
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [main, develop, 'feature/**']
+  pull_request:
+    branches: [main, develop]
 
 jobs:
   unit-tests:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-java@v3
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+      - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00  # v4.7.1
         with:
           java-version: '21'
           distribution: 'temurin'
-      - env:
+      - name: Unit tests + ArchUnit
+        env:
           MAVEN_OPTS: -Xmx512m
-        run: mvn clean test -P unit-tests
+        run: cd backend && mvn clean test -P unit-tests
 
-  integration-tests:
+  integration:
     runs-on: ubuntu-latest
-    services:
-      docker:
-        image: docker:dind
+    needs: [unit-tests]
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-java@v3
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+      - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00  # v4.7.1
         with:
           java-version: '21'
           distribution: 'temurin'
-      - env:
+      - name: Integration tests (TestContainers)
+        env:
           MAVEN_OPTS: -Xmx512m
-        run: mvn clean verify -P integration-tests
+          TESTCONTAINERS_REUSE_ENABLE: "true"
+        run: cd backend && mvn clean verify -P integration-tests
 
-  quality-gates:
+  bdd-tests:
     runs-on: ubuntu-latest
+    needs: [unit-tests]
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-java@v3
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+      - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00  # v4.7.1
         with:
           java-version: '21'
           distribution: 'temurin'
-      - env:
+      - name: BDD / Cucumber tests
+        env:
           MAVEN_OPTS: -Xmx512m
+          TESTCONTAINERS_REUSE_ENABLE: "true"
+        run: cd backend && mvn clean verify -P integration-tests -Dcucumber.filter.tags=@bdd
+
+  contract-tests:
+    runs-on: ubuntu-latest
+    needs: [unit-tests]
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+      - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00  # v4.7.1
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+      - name: Spring Cloud Contract tests
+        env:
+          MAVEN_OPTS: -Xmx512m
+        run: cd backend && mvn spring-cloud-contract:generateTests verify
+
+  sonarcloud:
+    runs-on: ubuntu-latest
+    needs: [integration, bdd-tests]
+    if: github.event_name == 'push'
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00  # v4.7.1
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+      - name: Quality gates + SonarCloud
+        env:
+          MAVEN_OPTS: -Xmx1g
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn clean verify -P quality-gates
+        run: cd backend && mvn verify sonar:sonar -P quality-gates -DskipPit
 ```
 
 ---
@@ -218,9 +293,9 @@ jobs:
 
 **Cause**: Heap too small for mutation analysis.
 
-**Solution**: Increase memory for Job 3:
+**Solution**: Job 5 (`sonarcloud`) already uses `-Xmx1g`. Local override if needed:
 ```bash
-MAVEN_OPTS=-Xmx1g mvn clean verify -P quality-gates
+MAVEN_OPTS=-Xmx2g mvn clean verify -P quality-gates
 ```
 
 ### ArchUnit fails on valid code
@@ -238,11 +313,8 @@ public interface DocumentValidatorPort { ... }
 
 **Solution**:
 ```bash
-# Check Docker is running
 docker info
-
-# Run with verbose output
-mvn clean verify -P integration-tests -X
+TESTCONTAINERS_REUSE_ENABLE=true mvn clean verify -P integration-tests -X
 ```
 
 ### SonarCloud fails on duplication
@@ -255,8 +327,9 @@ mvn clean verify -P integration-tests -X
 
 ## References
 
-- **ADR-008**: Hexagonal architecture with 3 CI jobs, MAVEN_OPTS=-Xmx512m
+- **ADR-008**: Five CI jobs, `MAVEN_OPTS` caps, `TESTCONTAINERS_REUSE_ENABLE=true` on jobs 2–3
+- **SEC-002**: All third-party `uses:` pinned to full commit SHA
 - **ArchUnit Rules**: `docai-bootstrap/src/test/java/fr/docai/bootstrap/HexagonalArchitectureTest.java`
-- **Checkstyle Config**: `checkstyle.xml` (20-line max, 4 params, complexity ≤ 10)
+- **Checkstyle Config**: `backend/checkstyle.xml` (20-line max methods, 4 params, complexity ≤ 10, class ≤ 200 lines)
 - **Code Coverage**: JaCoCo (global ≥ 80%, domain ≥ 90%)
 - **Mutation Testing**: PIT (domain ≥ 85%, global ≥ 80%)

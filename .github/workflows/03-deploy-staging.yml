@@ -1,0 +1,52 @@
+# Staging Deployment — triggered automatically when 02-docker.yml succeeds on develop
+# SEC-002: all third-party uses: pinned to full commit SHA.
+# SEC-003: explicit permissions (contents: read).
+# Note: id-token: write is pre-positioned for future OIDC migration — currently unused (kubeconfig auth).
+
+name: Deploy Staging
+
+on:
+  workflow_run:
+    workflows: [Docker]
+    types: [completed]
+    branches: [develop]
+
+jobs:
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success'
+    permissions:
+      contents: read
+      id-token: write   # pre-positioned for OIDC federation migration — currently unused (kubeconfig auth)
+
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Configure kubectl (staging)
+        run: |
+          mkdir -p ~/.kube
+          printf '%s' "${{ secrets.KUBE_CONFIG_STAGING }}" | base64 -d > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Roll out new image
+        run: |
+          kubectl set image deployment/docai-backend \
+            docai-backend=ghcr.io/${{ github.repository_owner }}/docai-backend:${{ github.event.workflow_run.head_sha }} \
+            --namespace docai-staging
+
+      - name: Wait for rollout
+        run: kubectl rollout status deployment/docai-backend --namespace docai-staging --timeout=120s
+
+      - name: Rollback on failure
+        if: failure()
+        run: |
+          kubectl rollout undo deployment/docai-backend --namespace docai-staging
+          kubectl rollout status deployment/docai-backend --namespace docai-staging --timeout=60s
+
+      - name: Post-deploy health check
+        run: curl --fail --show-error --max-time 15 https://staging.docai.fr/actuator/health
+
+      - name: Cleanup kubeconfig
+        if: always()
+        run: rm -f ~/.kube/config

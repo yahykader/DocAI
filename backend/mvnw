@@ -1,0 +1,76 @@
+#!/bin/sh
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+# ---------------------------------------------------------------------------
+# Apache Maven Wrapper — version 3.3.2
+# Compatible with POSIX sh and Alpine Linux (BusyBox)
+#
+# Downloads Maven 3.9.9 from Apache servers on first use.
+# Subsequent runs use the cached installation from ~/.m2/wrapper/dists/.
+# ---------------------------------------------------------------------------
+
+set -e
+
+# Resolve absolute path to the script directory
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+WRAPPER_PROPS="${SCRIPT_DIR}/.mvn/wrapper/maven-wrapper.properties"
+
+if [ ! -f "${WRAPPER_PROPS}" ]; then
+  printf 'ERROR: Maven wrapper config not found: %s\n' "${WRAPPER_PROPS}" >&2
+  exit 1
+fi
+
+# Parse distributionUrl from properties (supports = or \= separator)
+DISTRIBUTION_URL="$(grep '^distributionUrl=' "${WRAPPER_PROPS}" | sed 's/^distributionUrl=//')"
+
+if [ -z "${DISTRIBUTION_URL}" ]; then
+  printf 'ERROR: distributionUrl not found in %s\n' "${WRAPPER_PROPS}" >&2
+  exit 1
+fi
+
+# Derive Maven version from archive filename (e.g. apache-maven-3.9.9-bin.zip)
+ARCHIVE="$(basename "${DISTRIBUTION_URL}")"
+MAVEN_VERSION="${ARCHIVE%-bin.zip}"
+
+# Cache directory — mirrors Maven Wrapper convention
+M2_WRAPPER_DISTS="${HOME}/.m2/wrapper/dists"
+MAVEN_HOME="${M2_WRAPPER_DISTS}/${MAVEN_VERSION}"
+
+# Download and extract Maven if not already cached
+if [ ! -x "${MAVEN_HOME}/bin/mvn" ]; then
+  printf 'Downloading %s ...\n' "${MAVEN_VERSION}"
+  mkdir -p "${M2_WRAPPER_DISTS}"
+  TMP_ZIP="$(mktemp)"
+
+  # Prefer curl (more reliable in Alpine); fall back to wget (BusyBox)
+  if command -v curl > /dev/null 2>&1; then
+    curl -fsSL "${DISTRIBUTION_URL}" -o "${TMP_ZIP}"
+  elif command -v wget > /dev/null 2>&1; then
+    wget -q "${DISTRIBUTION_URL}" -O "${TMP_ZIP}"
+  else
+    printf 'ERROR: curl or wget required to download Maven\n' >&2
+    rm -f "${TMP_ZIP}"
+    exit 1
+  fi
+
+  unzip -q "${TMP_ZIP}" -d "${M2_WRAPPER_DISTS}"
+  rm -f "${TMP_ZIP}"
+  printf 'Maven %s installed to %s\n' "${MAVEN_VERSION}" "${MAVEN_HOME}"
+fi
+
+exec "${MAVEN_HOME}/bin/mvn" "$@"

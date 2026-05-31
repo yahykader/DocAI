@@ -1894,6 +1894,7 @@ Ordre obligatoire :
   Vérifier : log visible avec tenantId dans Grafana, prometheus UP
 ```
 
+
 ---
 
 ## 🟠 speckit-checklist — Module 1.B

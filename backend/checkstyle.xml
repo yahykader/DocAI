@@ -51,6 +51,12 @@
             <property name="switchBlockAsSingleDecision" value="true"/>
         </module>
 
+        <!-- Class length check (max 200 lines, T003) -->
+        <module name="ClassLength">
+            <property name="max" value="200"/>
+            <property name="countEmpty" value="false"/>
+        </module>
+
         <!-- Blank line padding -->
         <module name="EmptyLineSeparator">
             <property name="allowNoEmptyLineBetweenFields" value="false"/>

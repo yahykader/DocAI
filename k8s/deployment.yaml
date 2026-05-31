@@ -1,0 +1,114 @@
+# Base manifest — namespace is docai-staging.
+# For production, use: kubectl apply -k k8s/overlays/production
+# CI rolling updates use kubectl set image --namespace <ns> directly (see 03-deploy-staging.yml, 04-deploy-production.yml).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: docai-backend
+  namespace: docai-staging
+  labels:
+    app: docai-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: docai-backend
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0   # BR-K8S-001: zero downtime — no pod removed before new one is ready
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: docai-backend
+    spec:
+      securityContext:              # pod-level: identity constraints only (SEC-001)
+        runAsNonRoot: true
+        runAsUser: 1001             # UID of user "docai" created in Dockerfile (SEC-001)
+      volumes:
+        - name: tmp-dir
+          emptyDir: {}              # Spring Boot writes temp files to /tmp (readOnlyRootFilesystem workaround)
+      containers:
+        - name: docai-backend
+          image: ghcr.io/docai/docai-backend:DEPLOY_SHA  # substituted by kubectl set image in CI
+          imagePullPolicy: Always
+          securityContext:          # container-level: filesystem and capability constraints (SEC-001)
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+          ports:
+            - name: http
+              containerPort: 8080
+            - name: management
+              containerPort: 9091
+          volumeMounts:
+            - name: tmp-dir
+              mountPath: /tmp
+          resources:
+            requests:
+              memory: 512Mi
+              cpu: 250m
+            limits:
+              memory: 1Gi
+              cpu: 1000m
+          startupProbe:             # absorbs slow first-boot: JVM warm-up + Mongock + Kafka + 11 modules
+            httpGet:
+              path: /actuator/health/liveness
+              port: 9091
+            failureThreshold: 12    # 12 × 10s = 120s max startup window before liveness kicks in
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 9091
+            initialDelaySeconds: 90
+            periodSeconds: 30
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 9091
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            failureThreshold: 3
+          env:
+            # All env vars sourced from AWS Secrets Manager via CSI Driver — zero hardcoded secrets (SEC-001)
+            - name: MONGODB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: docai-secrets
+                  key: mongodb-uri
+            - name: VALKEY_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: docai-secrets
+                  key: valkey-host
+            - name: VALKEY_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: docai-secrets
+                  key: valkey-password
+            - name: KEYCLOAK_URL
+              valueFrom:
+                secretKeyRef:
+                  name: docai-secrets
+                  key: keycloak-url
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              valueFrom:
+                secretKeyRef:
+                  name: docai-secrets
+                  key: kafka-bootstrap-servers
+            - name: UNLEASH_URL
+              valueFrom:
+                secretKeyRef:
+                  name: docai-secrets
+                  key: unleash-url
+            - name: UNLEASH_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: docai-secrets
+                  key: unleash-api-token
+            - name: SPRING_PROFILES_ACTIVE
+              value: staging

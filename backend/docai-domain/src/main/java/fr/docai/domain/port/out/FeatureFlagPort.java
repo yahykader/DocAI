@@ -1,15 +1,12 @@
 package fr.docai.domain.port.out;
 
+/**
+ * Port for feature flag evaluation. Implementations MUST be fail-safe:
+ * any exception from the underlying provider returns {@code false} (flag disabled).
+ */
 public interface FeatureFlagPort {
 
-  boolean isEnabled(String featureName, String tenantId);
+    boolean isEnabled(String flagName);
 
-  boolean isEnabled(String featureName);
-
-  void setEnabled(String featureName, boolean enabled);
-
-  record FeatureConfig(
-      String name,
-      boolean enabled,
-      String tenantId) {}
+    boolean isEnabled(String flagName, String tenantId);
 }

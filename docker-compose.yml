@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
   # ==================== DATABASE ====================
   mongodb:
@@ -281,6 +279,85 @@ services:
     networks:
       - docai-network
 
+  # ==================== FEATURE FLAGS ====================
+  unleash-db:
+    image: postgres:16-alpine
+    container_name: docai-unleash-db
+    ports:
+      - "5433:5432"   # offset to avoid conflict with keycloak-db on 5432
+    # LOCAL PROFILE ONLY — staging/prod uses AWS Secrets Manager (SEC-004)
+    environment:
+      POSTGRES_DB: unleash
+      POSTGRES_USER: unleash
+      POSTGRES_PASSWORD: unleash
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U unleash" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    volumes:
+      - unleash_db_data:/var/lib/postgresql/data
+    networks:
+      - docai-network
+
+  unleash:
+    image: unleashorg/unleash-server:5.13.0
+    container_name: docai-unleash
+    depends_on:
+      unleash-db:
+        condition: service_healthy
+    ports:
+      - "4242:4242"
+    environment:
+      DATABASE_URL: postgresql://unleash:unleash@unleash-db/unleash   # LOCAL PROFILE ONLY (SEC-004)
+      INIT_FRONTEND_API_TOKENS: "*:*.unleash-insecure-api-token"      # LOCAL PROFILE ONLY (SEC-004)
+      INIT_ADMIN_API_TOKENS: "default:*.unleash-insecure-admin-token" # LOCAL PROFILE ONLY — admin token for flag provisioning (SEC-004)
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:4242/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - docai-network
+
+  # Unleash feature flag initialization — provisions 6 flags required by FR-019
+  unleash-init:
+    image: curlimages/curl:8.7.1
+    container_name: docai-unleash-init
+    depends_on:
+      unleash:
+        condition: service_healthy
+    environment:
+      UNLEASH_URL: http://unleash:4242
+      # LOCAL PROFILE ONLY — admin token matches INIT_ADMIN_API_TOKENS in unleash service; required for POST /api/admin/* (SEC-004)
+      UNLEASH_TOKEN: "default:*.unleash-insecure-admin-token"
+    entrypoint: >
+      sh -c '
+      echo "Provisioning Unleash feature flags (FR-019)..."
+
+      create_flag() {
+        curl -sf -X POST "$$UNLEASH_URL/api/admin/projects/default/features" \
+          -H "Authorization: $$UNLEASH_TOKEN" \
+          -H "Content-Type: application/json" \
+          -d "{\"name\": \"$$1\", \"type\": \"release\", \"enabled\": false}" \
+          && echo "Created flag: $$1" \
+          || echo "Flag already exists (skipped): $$1"
+      }
+
+      create_flag "billing.enabled"
+      create_flag "fraud.v2.enabled"
+      create_flag "extraction.mistral.enabled"
+      create_flag "dashboard.search.enabled"
+      create_flag "notifications.inapp.enabled"
+      create_flag "maintenance.mode"
+
+      echo "Feature flag provisioning complete."
+      '
+    networks:
+      - docai-network
+
   # ==================== OBSERVABILITY ====================
   prometheus:
     image: prom/prometheus:latest
@@ -357,6 +434,8 @@ services:
       - docai-network
 
 volumes:
+  unleash_db_data:
+    driver: local
   mongodb_data:
     driver: local
   mongodb_config:

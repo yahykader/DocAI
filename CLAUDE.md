@@ -494,8 +494,8 @@ See implementation plan in `DOCAI_BACKEND_MASTER_SPECKIT_F_V2.md` for detailed m
 ---
 
 <!-- SPECKIT START -->
-**Active Feature Plan**: `specs/005-persistance-standards/plan.md` (Module C — Persistance & Standards)  
-**Branch**: `005-persistance-standards` | **Status**: Plan complete → next `/speckit-tasks`
+**Active Feature Plan**: `specs/006-cicd-standards/plan.md` (Module 1.B — CI/CD Pipeline & Standards)  
+**Branch**: `006-cicd-standards` | **Status**: Plan complete → next `/speckit-tasks`
 <!-- SPECKIT END -->
 
 **Last Updated**: 2026-05-25  

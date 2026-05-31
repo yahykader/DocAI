@@ -67,7 +67,7 @@
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-registry-prometheus</artifactId>
         </dependency>
-        <!-- H-2: OTel MDC bridge — injects traceId into MDC automatically (FR-OBS-002) -->
+        <!-- OTel MDC bridge — injects traceId into MDC automatically (FR-OBS-002) -->
         <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-tracing-bridge-otel</artifactId>
@@ -84,12 +84,24 @@
             <groupId>io.opentelemetry</groupId>
             <artifactId>opentelemetry-exporter-otlp</artifactId>
         </dependency>
-        <!-- TODO: Uncomment when implementing detailed observability (Phase 3+)
+        <!--
+          opentelemetry-spring-boot-starter: evaluated in T027 (Module 1.B).
+          DECISION: micrometer-tracing-bridge-otel alone provides Spring Boot 4 auto-instrumentation
+          for @Observed and HTTP spans via Micrometer Observation API. The OTel starter adds
+          bytecode-agent-level instrumentation but introduces a duplicate instrumentation layer
+          when micrometer-tracing-bridge-otel is also present, causing classpath conflicts in
+          Spring Boot 4. Keep commented until a specific instrumentation gap is identified.
         <dependency>
             <groupId>io.opentelemetry.instrumentation</groupId>
             <artifactId>opentelemetry-spring-boot-starter</artifactId>
         </dependency>
         -->
+
+        <!-- === FEATURE FLAGS: UNLEASH === -->
+        <dependency>
+            <groupId>io.getunleash</groupId>
+            <artifactId>unleash-client-java</artifactId>
+        </dependency>
 
         <!-- === PAYMENTS: STRIPE === -->
         <dependency>
