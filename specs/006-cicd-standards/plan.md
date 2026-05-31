@@ -149,7 +149,7 @@ MAVEN_OPTS=-Xmx512m mvn checkstyle:check -P quality-gates
 | `integration` | `integration-tests` | `-Xmx512m` | `mvn clean verify -P integration-tests` | Yes |
 | `bdd-tests` | `integration-tests` | `-Xmx512m` | `mvn clean verify -P integration-tests -Dcucumber.filter.tags=@bdd` | Yes |
 | `contract-tests` | *(direct goal)* | `-Xmx512m` | `mvn spring-cloud-contract:generateTests verify` | No |
-| `sonarcloud` | `quality-gates` | `-Xmx1g` | `mvn verify sonar:sonar -P quality-gates -DskipPit` | No |
+| `sonarcloud` | `quality-gates` | `-Xmx1g` | `mvn verify sonar:sonar -P quality-gates` | No |
 
 **Job dependencies:**
 ```
@@ -304,7 +304,7 @@ docker run --rm docai-backend:test whoami                # must print "docai"
 
 **Verification:**
 ```bash
-kubectl apply --dry-run=client -f k8s/
+kubectl apply --dry-run=client -k k8s/overlays/staging
 # Expected: 3 resources configured (no errors)
 ```
 

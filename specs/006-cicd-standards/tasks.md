@@ -82,7 +82,7 @@
 
 **Goal**: K8s manifests define zero-downtime `RollingUpdate` (maxUnavailable=0) with HPA (min=2, max=10, CPU 70%); `03-deploy-staging.yml` deploys automatically on successful Docker publish; `04-deploy-production.yml` requires manual approval via GitHub Environment.
 
-**Independent Test**: `kubectl apply --dry-run=client -f k8s/` → 0 errors, 3 resources configured; no `Secret` YAML present in `k8s/` directory.
+**Independent Test**: `kubectl apply --dry-run=client -k k8s/overlays/staging` → 0 errors, 3 resources configured; no `Secret` YAML present in `k8s/` directory.
 
 - [x] T011 [P] [US3] Create `k8s/deployment.yaml`:
   - `strategy.type: RollingUpdate`, `maxUnavailable: 0`, `maxSurge: 1` (BR-K8S-001, zero downtime)
@@ -108,7 +108,7 @@
 
 **Independent Test**: `docker compose up -d unleash unleash-db` → `curl http://localhost:4242/api/client/features` shows 6 flags all `false`; stop `unleash` container → application returns `false` for all `isEnabled()` calls with no thrown exception (unit test T023 verifies this).
 
-- [x] T017 [US4] Add two services to `docker-compose.yml`: `unleash-db` (`image: postgres:16-alpine`, env POSTGRES_DB/USER/PASSWORD all set to `unleash` — **add inline comment `# LOCAL PROFILE ONLY — staging/prod uses AWS Secrets Manager (SEC-004)`**; named volume `unleash-db-data`); `unleash` (`image: unleashorg/unleash-server:latest`, port 4242, `depends_on: unleash-db`, env DATABASE_URL pointing to unleash-db)
+- [x] T017 [US4] Add two services to `docker-compose.yml`: `unleash-db` (`image: postgres:16-alpine`, env POSTGRES_DB/USER/PASSWORD all set to `unleash` — **add inline comment `# LOCAL PROFILE ONLY — staging/prod uses AWS Secrets Manager (SEC-004)`**; named volume `unleash-db-data`); `unleash` (`image: unleashorg/unleash-server:5.13.0`, port 4242, `depends_on: unleash-db`, env DATABASE_URL pointing to unleash-db)
 - [x] T018 [P] [US4] Create `backend/docai-domain/src/main/java/fr/docai/domain/port/out/FeatureFlagPort.java`: interface with `boolean isEnabled(String flagName)` and `boolean isEnabled(String flagName, String tenantId)`; zero Spring/Unleash imports; Javadoc: "Implementations MUST be fail-safe: any exception returns false (flag disabled)" — reference file: `specs/006-cicd-standards/contracts/FeatureFlagPort.java`
 - [x] T019 [P] [US4] Add `<dependency><groupId>io.getunleash</groupId><artifactId>unleash-client-java</artifactId></dependency>` to `backend/docai-bootstrap/pom.xml` (use latest stable version from Maven Central)
 - [x] T020 [US4] Create `backend/docai-bootstrap/src/main/java/fr/docai/bootstrap/config/UnleashConfig.java`: `@Configuration` class; `@Bean` method returning `DefaultUnleash` initialized with `UnleashConfig.newConfig().appName("${docai.unleash.app-name}").instanceId("docai-backend").unleashAPI("${docai.unleash.url}/api").apiKey("${docai.unleash.api-token}").build()`
